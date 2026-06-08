@@ -1,0 +1,19 @@
+[project]
+name = "quartzwood"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Patch"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "sqlmodel (>=0.0.38,<0.0.39)",
+    "typer (>=0.26.7,<0.27.0)",
+    "httpx (>=0.28.1,<0.29.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
