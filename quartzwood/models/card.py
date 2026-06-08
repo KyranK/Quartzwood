@@ -11,6 +11,7 @@ class CardInstance(SQLModel, table=True):
     scryfall_id: str
     set_number: str
     set_code: str
+    name: str
 
     # Physical attributes
     condition: Condition
