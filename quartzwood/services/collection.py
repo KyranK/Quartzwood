@@ -57,12 +57,13 @@ def add_card(
     set_number: str,
     set_code: str,
     condition: Condition,
+    quantity: int = 1,
     storage_name: str = None,
     foil_type: FoilType = FoilType.none,
     stamp_type: StampType = StampType.none,
     language: str = "en",
     notes: str = None,
-) -> CardInstance | str:
+) -> list[CardInstance] | str:
     """
     Resolves card via Scryfall then writes to DB.
     Returns the CardInstance on success, or an error string on failure.
@@ -80,23 +81,28 @@ def add_card(
         if storage_id is None:
             raise ValueError(f"Collection '{storage_name}' not found")
 
-    card = CardInstance(
-        scryfall_id=fields["scryfall_id"],
-        set_number=fields["set_number"],
-        set_code=fields["set_code"],
-        name=fields["name"],
-        condition=condition,
-        foil_type=foil_type,
-        stamp_type=stamp_type,
-        language=language,
-        storage_id=storage_id,
-        notes=notes,
-    )
+    cards = []
+    for _ in range(quantity):
+        card = CardInstance(
+            scryfall_id=fields["scryfall_id"],
+            set_number=fields["set_number"],
+            set_code=fields["set_code"],
+            name=fields["name"],
+            condition=condition,
+            foil_type=foil_type,
+            stamp_type=stamp_type,
+            language=language,
+            storage_id=storage_id,
+            notes=notes,
+        )
 
-    session.add(card)
+        session.add(card)
+        cards.append(card)
+
     session.commit()
-    session.refresh(card)
-    return card
+    for card in cards:
+        session.refresh(card)
+    return cards
 
 
 def get_all_cards(session: Session) -> list[CardInstance]:

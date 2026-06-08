@@ -1,4 +1,5 @@
 import typer
+from typer import Argument, Option
 from quartzwood.db import get_session, init_db
 from quartzwood.models.enums import Condition, FoilType, StampType
 from quartzwood.services.collection import (
@@ -47,11 +48,12 @@ def add(
     set_number: str,
     set_code: str,
     condition: Condition,
-    storage_name: str = None,
-    foil_type: FoilType = FoilType.none,
-    stamp_type: StampType = StampType.none,
-    language: str = "en",
-    notes: str = None,
+    quanitity: int = Option(1, "--quantity", "-q"),
+    storage_name: str = Option(None, "--storage-name", "-s"),
+    foil_type: FoilType = Option(FoilType.none, "--foil", "-f"),
+    stamp_type: StampType = Option(StampType.none, "--stamp", "-st"),
+    language: str = Option("en", "--language", "-l"),
+    notes: str = Option(None, "--notes", "-n"),
 ):
     """Add a card to the collection."""
     with get_session() as session:
@@ -62,6 +64,7 @@ def add(
                 set_code=set_code,
                 condition=condition,
                 storage_name=storage_name,
+                quantity=quanitity,
                 foil_type=foil_type,
                 stamp_type=stamp_type,
                 language=language,
@@ -70,7 +73,7 @@ def add(
             if isinstance(result, str):
                 typer.echo(f"Error: {result}")
             else:
-                typer.echo(f"Added: [{result.id}] {result.name} ({result.set_code} {result.set_number}) {result.condition.value}")
+                typer.echo(f"Added {len(result)}x {result[0].name} ({result[0].set_code} {result[0].set_number}) {result[0].condition.value}")
         except ValueError as e:
             typer.echo(f"Error: {e}")
 
