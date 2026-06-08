@@ -9,7 +9,7 @@ class CardInstance(SQLModel, table=True):
 
     # Card identity — resolved via Scryfall
     scryfall_id: str
-    collector_number: str
+    set_number: str
     set_code: str
 
     # Physical attributes
