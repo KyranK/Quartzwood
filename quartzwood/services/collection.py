@@ -112,3 +112,22 @@ def get_all_cards(session: Session) -> list[CardInstance]:
 def get_cards_by_storage(session: Session, storage_id: int) -> list[CardInstance]:
     return session.exec(select(CardInstance).where(CardInstance.storage_id == storage_id)).all()
 
+def get_cards_grouped(session: Session) -> list[dict]:
+    cards = session.exec(select(CardInstance)).all()
+    
+    groups = {}
+    for card in cards:
+        key = (card.name, card.set_code, card.set_number, card.condition, card.foil_type)
+        if key in groups:
+            groups[key]["count"] += 1
+        else:
+            groups[key] = {
+                "name": card.name,
+                "set_code": card.set_code,
+                "set_number": card.set_number,
+                "condition": card.condition.value,
+                "foil_type": card.foil_type.value,
+                "count": 1
+            }
+    
+    return list(groups.values())

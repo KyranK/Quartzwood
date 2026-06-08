@@ -9,6 +9,7 @@ from quartzwood.services.collection import (
     get_all_storage,
     add_card,
     get_all_cards,
+    get_cards_grouped,
 )
 from sqlalchemy.exc import IntegrityError
 
@@ -36,7 +37,11 @@ def new_collection(name: str, description: str = None):
 
 
 @app.command()
-def new_storage(name: str, collection_name: str = None, description: str = None):
+def new_storage(
+    name: str, 
+    collection_name: str = Option(None, "--collection-name", "-c"),
+    description: str = None
+    ):
     """Create a new storage location."""
     with get_session() as session:
         try:
@@ -91,15 +96,15 @@ def list_collections():
         for c in collections:
             typer.echo(f"[{c.id}] {c.name}")
             
-
+"""
 @app.command()
 def list_cards():
-    """List all cards."""
+    # List all cards.
     with get_session() as session:
         cards = get_all_cards(session)
         for c in cards:
             typer.echo(f"[{c.id}] {c.name} ({c.set_code} {c.set_number}) {c.condition.value} foil:{c.foil_type.value}")
-            
+"""            
 
 @app.command()
 def list_storage():
@@ -108,6 +113,17 @@ def list_storage():
         storages = get_all_storage(session)
         for s in storages:
             typer.echo(f"[{s.id}] {s.name} (collection: {s.collection_id})")
+
+
+@app.command()
+def list_cards():
+    """List all cards."""
+    with get_session() as session:
+        groups = get_cards_grouped(session)
+        for g in groups:
+            count = f"{g['count']}x " if g['count'] > 1 else ""
+            typer.echo(f"{count}{g['name']} ({g['set_code']} {g['set_number']}) {g['condition']} foil:{g['foil_type']}")
+
 
 
 if __name__ == "__main__":
