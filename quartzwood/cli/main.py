@@ -24,16 +24,22 @@ def init():
 def new_collection(name: str, description: str = None):
     """Create a new collection."""
     with get_session() as session:
-        collection = create_collection(session, name=name, description=description)
-        typer.echo(f"Created collection: [{collection.id}] {collection.name}")
+        try:
+            collection = create_collection(session, name=name, description=description)
+            typer.echo(f"Created collection: [{collection.id}] {collection.name}")
+        except ValueError as e:
+            typer.echo(f"Error: {e}")
 
 
 @app.command()
-def new_storage(name: str, collection_id: int = None, description: str = None):
+def new_storage(name: str, collection_name: str = None, description: str = None):
     """Create a new storage location."""
     with get_session() as session:
-        storage = create_storage(session, name=name, collection_id=collection_id, description=description)
-        typer.echo(f"Created storage: [{storage.id}] {storage.name}")
+        try:
+            storage = create_storage(session, name=name, collection_name=collection_name, description=description)
+            typer.echo(f"Created storage: [{storage.id}] {storage.name}")
+        except ValueError as e:
+            typer.echo(f"Error: {e}")
 
 
 @app.command()
@@ -41,7 +47,7 @@ def add(
     set_number: str,
     set_code: str,
     condition: Condition,
-    storage_id: int = None,
+    storage_name: str = None,
     foil_type: FoilType = FoilType.none,
     stamp_type: StampType = StampType.none,
     language: str = "en",
@@ -49,21 +55,24 @@ def add(
 ):
     """Add a card to the collection."""
     with get_session() as session:
-        result = add_card(
-            session=session,
-            set_number=set_number,
-            set_code=set_code,
-            condition=condition,
-            storage_id=storage_id,
-            foil_type=foil_type,
-            stamp_type=stamp_type,
-            language=language,
-            notes=notes,
-        )
-        if isinstance(result, str):
-            typer.echo(f"Error: {result}")
-        else:
-            typer.echo(f"Added: [{result.id}] {result.name} ({result.set_code} {result.set_number}) {result.condition.value}")
+        try:
+            result = add_card(
+                session=session,
+                set_number=set_number,
+                set_code=set_code,
+                condition=condition,
+                storage_name=storage_name,
+                foil_type=foil_type,
+                stamp_type=stamp_type,
+                language=language,
+                notes=notes,
+            )
+            if isinstance(result, str):
+                typer.echo(f"Error: {result}")
+            else:
+                typer.echo(f"Added: [{result.id}] {result.name} ({result.set_code} {result.set_number}) {result.condition.value}")
+        except ValueError as e:
+            typer.echo(f"Error: {e}")
 
 
 @app.command()

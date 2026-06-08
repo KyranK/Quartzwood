@@ -1,0 +1,17 @@
+# Reset db
+Remove-Item quartzwood.db
+poetry run python -m quartzwood.cli.main init
+
+# Test
+
+poetry run python -m quartzwood.cli.main new-collection "Main"
+
+
+#poetry run python -m quartzwood.cli.main new-storage "RedBinder" --collection-id 1
+poetry run python -m quartzwood.cli.main new-storage "RedBinder" --collection-name Main
+
+#poetry run python -m quartzwood.cli.main add 187 MH3 NM --storage-id 1
+poetry run python -m quartzwood.cli.main add 187 MH3 NM --storage-name RedBinder
+
+poetry run python -m quartzwood.cli.main list-cards
+

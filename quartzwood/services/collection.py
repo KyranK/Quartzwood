@@ -23,7 +23,18 @@ def get_all_collections(session: Session) -> list[Collection]:
 
 # --- Storage ---
 
-def create_storage(session: Session, name: str, collection_id: int = None, description: str = None) -> Storage:
+def get_collection_id_by_name(session: Session, collection_name: str) -> int | None:
+    collection = session.exec(select(Collection).where(Collection.name == collection_name)).first()
+    return collection.id if collection else None
+
+
+def create_storage(session: Session, name: str, collection_name: str = None, description: str = None) -> Storage:
+    collection_id = None
+    if collection_name:
+        collection_id = get_collection_id_by_name(session, collection_name)
+        if collection_id is None:
+            raise ValueError(f"Collection '{collection_name}' not found")
+        
     storage = Storage(name=name, collection_id=collection_id, description=description)
     session.add(storage)
     session.commit()
@@ -36,13 +47,17 @@ def get_all_storage(session: Session) -> list[Storage]:
 
 
 # --- Cards ---
+def get_storage_id_by_name(session: Session, storage_name: str) -> int | None:
+    storage = session.exec(select(Storage).where(Storage.name == storage_name)).first()
+    return storage.id if storage else None
+
 
 def add_card(
     session: Session,
     set_number: str,
     set_code: str,
     condition: Condition,
-    storage_id: int = None,
+    storage_name: str = None,
     foil_type: FoilType = FoilType.none,
     stamp_type: StampType = StampType.none,
     language: str = "en",
@@ -58,6 +73,12 @@ def add_card(
         return f"Card not found: {set_code} {set_number}"
 
     fields = extract_card_fields(scryfall_data)
+    
+    storage_id = None
+    if storage_name: 
+        storage_id = get_storage_id_by_name(session,storage_name)
+        if storage_id is None:
+            raise ValueError(f"Collection '{storage_name}' not found")
 
     card = CardInstance(
         scryfall_id=fields["scryfall_id"],
