@@ -10,6 +10,7 @@ from quartzwood.services.collection import (
     add_card,
     get_all_cards,
 )
+from sqlalchemy.exc import IntegrityError
 
 app = typer.Typer()
 
@@ -30,6 +31,8 @@ def new_collection(name: str, description: str = None):
             typer.echo(f"Created collection: [{collection.id}] {collection.name}")
         except ValueError as e:
             typer.echo(f"Error: {e}")
+        except IntegrityError:
+            typer.echo(f"Error: '{name}' already exists")
 
 
 @app.command()
@@ -41,6 +44,8 @@ def new_storage(name: str, collection_name: str = None, description: str = None)
             typer.echo(f"Created storage: [{storage.id}] {storage.name}")
         except ValueError as e:
             typer.echo(f"Error: {e}")
+        except IntegrityError:
+            typer.echo(f"Error: '{name}' already exists")
 
 
 @app.command()
