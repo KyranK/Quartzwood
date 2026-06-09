@@ -133,6 +133,31 @@ def get_cards_grouped(session: Session) -> list[dict]:
     return list(groups.values())
 
 
+def get_cards(
+    session: Session,
+    set_number: str,
+    set_code: str,
+    condition: Condition = None,
+    foil_type: FoilType = None,
+    storage_name: str = None,
+) -> list[CardInstance]:
+    
+    query = select(CardInstance).where(
+        CardInstance.set_number == set_number,
+        CardInstance.set_code == set_code,
+    )
+
+    if condition:
+        query = query.where(CardInstance.condition == condition)
+    if foil_type:
+        query = query.where(CardInstance.foil_type == foil_type)
+    if storage_name:
+        storage_id = get_storage_id_by_name(session, storage_name)
+        query = query.where(CardInstance.storage_id == storage_id)
+
+    return session.exec(query).all()
+
+
 def update_cards(
     session: Session,
     set_number: str, 
@@ -148,26 +173,19 @@ def update_cards(
     new_notes: str = None,
 ) -> list[CardInstance]:
     
-    find_query = select(CardInstance).where(
-        CardInstance.set_number == set_number,
-        CardInstance.set_code == set_code,
-    )
+    cards = get_cards(
+      session = session,
+      set_number = set_number,
+      set_code = set_code,
+      condition = condition,
+      foil_type = foil_type,
+      storage_name = storage_name,
+  )
 
-    # append filters conditionally
-    if condition:
-        find_query = find_query.where(CardInstance.condition == condition)
-    if foil_type:
-        find_query = find_query.where(CardInstance.foil_type == foil_type)
-    if storage_name:
-        storage_id = get_storage_id_by_name(session, storage_name)
-        find_query = find_query.where(CardInstance.storage_id == storage_id)
-
-    cards = session.exec(find_query).all()
-    
     if new_storage_name:
         new_storage_id = get_storage_id_by_name(session, new_storage_name)
-        if new_storage_id is None:
-            raise ValueError(f"Storage '{new_storage_name}' not found")
+    if new_storage_id is None:
+        raise ValueError(f"Storage '{new_storage_name}' not found")
 
     for card in cards:
         if new_condition:
@@ -183,5 +201,31 @@ def update_cards(
     session.commit()
     for card in cards:
         session.refresh(card)
+    return cards
+
+
+def delete_cards(
+    session: Session,
+    set_number: str, 
+    set_code: str, 
+    # filters
+    condition: Condition = None,
+    foil_type: FoilType = None,
+    storage_name: str = None,
+) -> list[CardInstance]:
+    
+    cards = get_cards(
+      session = session,
+      set_number = set_number,
+      set_code = set_code,
+      condition = condition,
+      foil_type = foil_type,
+      storage_name = storage_name,
+  )
+    
+    for card in cards:
+        session.delete(card)
+    session.commit()
+
     return cards
 

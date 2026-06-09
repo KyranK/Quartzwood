@@ -11,6 +11,7 @@ from quartzwood.services.collection import (
     get_all_cards,
     get_cards_grouped,
     update_cards,
+    delete_cards,
 )
 from sqlalchemy.exc import IntegrityError
 
@@ -164,6 +165,33 @@ def update(
             typer.echo(f"Error: {e}")
 
 
+@app.command()
+def rmv_cards(
+    # Card
+    set_number: str, 
+    set_code: str,
+    # filters
+    condition: Condition = Option(None, "--condition", "-c"),
+    foil_type: FoilType = Option(None, "--foil", "-f"),
+    storage_name: str = Option(None, "--storage", "-s"),
+):
+    ### remove cards ###
+    with get_session() as session:
+        try:
+            cards = delete_cards(
+                session=session,
+                set_number = set_number,
+                set_code = set_code,
+                storage_name = storage_name,
+                condition = condition,
+                foil_type = foil_type,
+            )
+            if not cards:
+                typer.echo("No cards found matching those filters")
+            else:
+                typer.echo(f"Removed {len(cards)} card(s)")
+        except ValueError as e:
+            typer.echo(f"Error: {e}")
 
 
 
