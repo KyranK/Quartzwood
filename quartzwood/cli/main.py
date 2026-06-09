@@ -10,6 +10,7 @@ from quartzwood.services.collection import (
     add_card,
     get_all_cards,
     get_cards_grouped,
+    update_cards,
 )
 from sqlalchemy.exc import IntegrityError
 
@@ -123,6 +124,65 @@ def list_cards():
         for g in groups:
             count = f"{g['count']}x " if g['count'] > 1 else ""
             typer.echo(f"{count}{g['name']} ({g['set_code']} {g['set_number']}) {g['condition']} foil:{g['foil_type']}")
+
+
+@app.command()
+def update(
+    # Card
+    set_number: str, 
+    set_code: str,
+    # filters
+    condition: Condition = Option(None, "--condition", "-c"),
+    foil_type: FoilType = Option(None, "--foil", "-f"),
+    storage_name: str = Option(None, "--storage", "-s"),
+    # Changes
+    new_condition: Condition = Option(None, "--new-condition", "-C"),
+    new_foil_type: FoilType = Option(None, "--new-foil", "-F"),
+    new_storage_name: str = Option(None, "--new-storage", "-S"),
+    new_notes: str = Option(None, "--notes", "-n"),
+):
+    ### update cards ###
+    with get_session() as session:
+        try:
+            cards = update_cards(
+                session=session,
+                set_number = set_number,
+                set_code = set_code,
+                storage_name = storage_name,
+                condition = condition,
+                foil_type = foil_type,
+                new_condition = new_condition,
+                new_foil_type = new_foil_type,
+                new_storage_name = new_storage_name,
+                new_notes = new_notes
+            )
+            if not cards:
+                typer.echo("No cards found matching those filters")
+            else:
+                typer.echo(f"Updated {len(cards)} card(s)")
+        except ValueError as e:
+            typer.echo(f"Error: {e}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

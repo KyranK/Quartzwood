@@ -131,3 +131,57 @@ def get_cards_grouped(session: Session) -> list[dict]:
             }
     
     return list(groups.values())
+
+
+def update_cards(
+    session: Session,
+    set_number: str, 
+    set_code: str, 
+    # filters
+    condition: Condition = None,
+    foil_type: FoilType = None,
+    storage_name: str = None,
+    # updates
+    new_condition: Condition = None,
+    new_foil_type: FoilType = None,
+    new_storage_name: str = None,
+    new_notes: str = None,
+) -> list[CardInstance]:
+    
+    find_query = select(CardInstance).where(
+        CardInstance.set_number == set_number,
+        CardInstance.set_code == set_code,
+    )
+
+    # append filters conditionally
+    if condition:
+        find_query = find_query.where(CardInstance.condition == condition)
+    if foil_type:
+        find_query = find_query.where(CardInstance.foil_type == foil_type)
+    if storage_name:
+        storage_id = get_storage_id_by_name(session, storage_name)
+        find_query = find_query.where(CardInstance.storage_id == storage_id)
+
+    cards = session.exec(find_query).all()
+    
+    if new_storage_name:
+        new_storage_id = get_storage_id_by_name(session, new_storage_name)
+        if new_storage_id is None:
+            raise ValueError(f"Storage '{new_storage_name}' not found")
+
+    for card in cards:
+        if new_condition:
+            card.condition = new_condition
+        if new_foil_type:
+            card.foil_type = new_foil_type
+        if new_notes:
+            card.notes = new_notes
+        if new_storage_name:
+            card.storage_id = new_storage_id
+        session.add(card)
+
+    session.commit()
+    for card in cards:
+        session.refresh(card)
+    return cards
+
