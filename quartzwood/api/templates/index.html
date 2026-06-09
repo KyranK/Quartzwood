@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quartzwood</title>
+    <style>
+        body { font-family: monospace; padding: 2rem; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; }
+        th, td { border: 1px solid #ccc; padding: 0.5rem 1rem; text-align: left; }
+        th { background: #f0f0f0; }
+        h2 { margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <h1>Quartzwood Collection</h1>
+
+    <h2>Cards</h2>
+    <table>
+        <tr>
+            <th>Count</th>
+            <th>Name</th>
+            <th>Set</th>
+            <th>Number</th>
+            <th>Condition</th>
+            <th>Foil</th>
+        </tr>
+        {% for card in cards %}
+        <tr>
+            <td>{{ card.count }}</td>
+            <td>{{ card.name }}</td>
+            <td>{{ card.set_code }}</td>
+            <td>{{ card.set_number }}</td>
+            <td>{{ card.condition }}</td>
+            <td>{{ card.foil_type }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Collections</h2>
+    <table>
+        <tr><th>ID</th><th>Name</th><th>Description</th></tr>
+        {% for c in collections %}
+        <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.description }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Storage</h2>
+    <table>
+        <tr><th>ID</th><th>Name</th><th>Collection</th></tr>
+        {% for s in storages %}
+        <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.collection_id }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
