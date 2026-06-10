@@ -7,27 +7,59 @@ from quartzwood.services.scryfall import get_card_by_set_and_number, extract_car
 from quartzwood.db import get_session
 
 
-# --- Collection ---
-
+#region Collection
+    #region Create
 def create_collection(session: Session, name: str, description: str = None) -> Collection:
     collection = Collection(name=name, description=description)
     session.add(collection)
     session.commit()
     session.refresh(collection)
     return collection
-
-
+    
+    #endregion
+    #region Read
 def get_all_collections(session: Session) -> list[Collection]:
     return session.exec(select(Collection)).all()
 
-
-# --- Storage ---
 
 def get_collection_id_by_name(session: Session, collection_name: str) -> int | None:
     collection = session.exec(select(Collection).where(Collection.name == collection_name)).first()
     return collection.id if collection else None
 
+    #endregion
+    #region update
+def update_collection(
+        session: Session,
+        collection_name: str,
+        # update fields
+        new_name: str = None,
+        new_description: str = None,
+        new_location: str = None
+) -> Collection:
+    collection_id = get_collection_id_by_name(session, collection_name)
+    if collection_id is None:
+            raise ValueError(f"Collection '{collection_name}' not found")
+    
+    collection = session.get(Collection, collection_id)
 
+    if new_name:
+        collection.name = new_name
+    if new_description:
+        collection.description = new_description
+    if new_location:
+        collection.location = new_location
+
+    session.add(collection)
+    session.commit()
+    session.refresh(collection)
+      
+    return collection
+
+    #endregion
+
+
+#endregion
+#region Storage
 def create_storage(session: Session, name: str, collection_name: str = None, description: str = None) -> Storage:
     collection_id = None
     if collection_name:
@@ -46,12 +78,12 @@ def get_all_storage(session: Session) -> list[Storage]:
     return session.exec(select(Storage)).all()
 
 
-# --- Cards ---
 def get_storage_id_by_name(session: Session, storage_name: str) -> int | None:
     storage = session.exec(select(Storage).where(Storage.name == storage_name)).first()
     return storage.id if storage else None
 
-
+#endregion
+#region Cards
 def add_card(
     session: Session,
     set_number: str,
@@ -112,6 +144,7 @@ def get_all_cards(session: Session) -> list[CardInstance]:
 def get_cards_by_storage(session: Session, storage_id: int) -> list[CardInstance]:
     return session.exec(select(CardInstance).where(CardInstance.storage_id == storage_id)).all()
 
+
 def get_cards_grouped(session: Session) -> list[dict]:
     cards = session.exec(select(CardInstance)).all()
     
@@ -129,11 +162,10 @@ def get_cards_grouped(session: Session) -> list[dict]:
                 "foil_type": card.foil_type.value,
                 "count": 1
             }
-    
     return list(groups.values())
 
 
-def get_cards(
+def get_cards_filtered(
     session: Session,
     set_number: str,
     set_code: str,
@@ -173,7 +205,7 @@ def update_cards(
     new_notes: str = None,
 ) -> list[CardInstance]:
     
-    cards = get_cards(
+    cards = get_cards_filtered(
       session = session,
       set_number = set_number,
       set_code = set_code,
@@ -214,7 +246,7 @@ def delete_cards(
     storage_name: str = None,
 ) -> list[CardInstance]:
     
-    cards = get_cards(
+    cards = get_cards_filtered(
       session = session,
       set_number = set_number,
       set_code = set_code,
@@ -228,4 +260,15 @@ def delete_cards(
     session.commit()
 
     return cards
+
+#endregion
+
+
+
+
+
+
+
+
+
 
