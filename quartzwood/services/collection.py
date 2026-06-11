@@ -1,3 +1,5 @@
+#File: services/Collection.py
+
 from sqlmodel import Session, select
 from quartzwood.models.collection import Collection
 from quartzwood.models.storage import Storage
@@ -123,14 +125,15 @@ def get_storage_by_collection_id(
         session: Session,
         collection_id: int
 ) -> list[Storage] | None:
-    return session.exec(select(Storage).where(Storage.collection_id == collection_id)).all()
+    storages = session.exec(select(Storage).where(Storage.collection_id == collection_id)).all()
+    return storages if storages else None
 
 
 def get_storage_by_name(
     session: Session,
     name: str
 ) -> Storage | None:
-    storage = session.exec(select(Storage).where(storage.name == name)).first()
+    storage = session.exec(select(Storage).where(Storage.name == name)).first()
     return storage if storage else None
 
     #endregion
@@ -205,10 +208,11 @@ def delete_storage(
     # commit & return
     session.commit()
     return storage
-    
 
+    #endregion
 #endregion
 #region Cards
+    #region Create
 def add_card(
     session: Session,
     set_number: str,
@@ -261,7 +265,8 @@ def add_card(
         session.refresh(card)
     return cards
 
-
+    #endregion
+    #region Read
 def get_all_cards(session: Session) -> list[CardInstance]:
     return session.exec(select(CardInstance)).all()
 
@@ -314,7 +319,8 @@ def get_cards_filtered(
 
     return session.exec(query).all()
 
-
+    #endregion
+    #region Update
 def update_cards(
     session: Session,
     set_number: str, 
@@ -341,8 +347,8 @@ def update_cards(
 
     if new_storage_name:
         new_storage_id = get_storage_id_by_name(session, new_storage_name)
-    if new_storage_id is None:
-        raise ValueError(f"Storage '{new_storage_name}' not found")
+        if new_storage_id is None:
+            raise ValueError(f"Storage '{new_storage_name}' not found")
 
     for card in cards:
         if new_condition:
@@ -360,7 +366,8 @@ def update_cards(
         session.refresh(card)
     return cards
 
-
+    #endregion
+    #region Delete
 def delete_cards(
     session: Session,
     set_number: str, 
@@ -386,14 +393,7 @@ def delete_cards(
 
     return cards
 
+    #endregion
 #endregion
 
-
-
-
-
-
-
-
-
-
+#EOF
