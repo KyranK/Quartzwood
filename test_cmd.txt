@@ -1,23 +1,39 @@
 # Reset db
 Remove-Item quartzwood.db
-
-#poetry run python -m quartzwood.cli.main init\
 qw init
 
-# Test
-
-#poetry run python -m quartzwood.cli.main new-collection "Main"
+# Setup
 qw new-collection "Main"
+qw new-collection "Trade Stock"
+qw new-storage "RedBinder" -c "Main"
+qw new-storage "BlueBinder" -c "Main"
+qw new-storage "TradeBox" -c "Trade Stock"
 
-#poetry run python -m quartzwood.cli.main new-storage "RedBinder" --collection-id 1
-#poetry run python -m quartzwood.cli.main new-storage "RedBinder" --collection-name Main
-qw new-storage "RedBinder" -c Main
+# Add cards
+qw add 187 MH3 NM -s RedBinder
+qw add 13 MH2 NM -s RedBinder -q 4
+qw add 189 MH3 LP -s BlueBinder
+qw add 13 MH2 NM -s TradeBox -q 2 -f traditional
 
-
-#poetry run python -m quartzwood.cli.main add 187 MH3 NM --storage-id 1
-poetry run python -m quartzwood.cli.main add 187 MH3 NM --storage-name RedBinder
-qw add 187 MH3 NM -s RedBinder -q 3
-
-#poetry run python -m quartzwood.cli.main list-cards
+# List
+qw list-collections
+qw list-storage
 qw list-cards
 
+# Update
+qw update 13 MH2 --new-condition LP -s RedBinder
+qw update 189 MH3 -S BlueBinder
+
+# Storage operations
+qw update-storage RedBinder --relocate "Trade Stock"
+qw rmv-storage TradeBox --relocate BlueBinder
+qw rmv-storage BlueBinder --force
+
+# Collection operations
+qw rmv-collection "Trade Stock" --relocate "Main"
+qw rmv-collection "Main" --force
+
+# Error cases (should fail cleanly)
+qw add 999 XXX NM
+qw new-collection "Main"
+qw rmv-storage RedBinder
