@@ -19,10 +19,14 @@ from quartzwood.services.collection import (
     delete_collection as svc_delete_collection,
     update_storage as svc_update_storage,
     delete_storage as svc_delete_storage,
+    get_storage_by_name as svc_get_storage_by_name,
+    get_cards_by_storage as svc_get_cards_by_storage,
 )
 from sqlalchemy.exc import IntegrityError, OperationalError
-
+from rich.table import Table
+from rich.console import Console
 app = typer.Typer()
+console = Console()  
 
 #endregion
 #region Helper Funcs
@@ -38,12 +42,14 @@ def handle_errors(e: Exception, target_name: str = None):
 
 #endregion
 #region Init
+    #region typer
 @app.command()
 def init():
     """Initialise the database."""
     init_db()
     typer.echo("Database initialised.")
 
+    #endregion
 #endregion
 #region Collection
     #region Create
@@ -139,6 +145,37 @@ def list_storage():
         for s in storages:
             typer.echo(f"[{s.id}] {s.name} (collection: {s.collection_id})")
     
+
+@app.command()
+def view_command(
+    storage_name: str,
+):
+    with get_session() as session:
+        try:
+            storage = svc_get_storage_by_name(session, storage_name)
+            if storage is None:
+                typer.echo(f"Storage {storage_name} not found")
+                return
+
+            cards = svc_get_cards_by_storage(session, storage.id)
+            if not cards:
+                # If storage has no cards
+                # that's ok just return empty table
+                pass
+            
+            table = Table(title=f"{storage_name}")
+            table.add_column("Name")
+            table.add_column("set Id")
+            table.add_column("Condition")
+            table.add_column("Foil")
+
+            for card in cards:
+                table.add_row(card.name, card.set_number+"-"+card.set_code, card.condition.value, card.foil_type.value)
+
+            console.print(table)
+        except Exception as e:
+            handle_errors(e, storage_name)
+
     #endregion
     #region Update
 @app.command()
