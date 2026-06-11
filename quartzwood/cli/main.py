@@ -1,5 +1,6 @@
 #File: cli/main.py
 
+#region Imports
 import typer
 from typer import Argument, Option
 from quartzwood.db import get_session, init_db
@@ -14,11 +15,14 @@ from quartzwood.services.collection import (
     get_cards_grouped,
     update_cards,
     delete_cards,
+    update_collection as svc_update_collection,
+    delete_collection as svc_delete_collection,
 )
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 app = typer.Typer()
 
+#endregion
 #region Init
 @app.command()
 def init():
@@ -53,9 +57,48 @@ def list_collections():
 
     #endregion
     #region Update
+@app.command()
+def update_collection(
+    collection_name: str,
+    # update fields
+    new_name: str = Option(None, "--new-name", "-N"),
+    new_description: str = Option(None, "--description", "-D"),
+    new_location: str = Option(None, "--new_location", "-L"),
+):
+    with get_session() as session:
+        try:
+            svc_update_collection(
+            session,
+            collection_name = collection_name,
+            # update fields
+            new_name = new_name,
+            new_description = new_description,
+            new_location = new_location,
+            )
+            typer.echo(f"Updated collection: {new_name if new_name else collection_name}")
+        except ValueError as e:
+            typer.echo(f"Error: {e}")
+        except IntegrityError:
+            typer.echo(f"Error: '{new_name}' already exists")
 
     #endregion
     #region delete
+@app.command()
+def delete_collection(
+    collection_name: str,
+    relocate_collection_name: str = Option(None, "--relocate", "-r"),
+    force: bool = Option(False, "--force"),
+):
+    with get_session() as session:
+        try:
+            svc_delete_collection(
+                session,
+                collection_name = collection_name,
+                relocate_collection_name = relocate_collection_name,
+                force = force,
+            )
+        except Exception as e:
+            handle_errors(e, collection_name)
 
     #endregion
 #endregion
@@ -214,6 +257,18 @@ def rmv_cards(
     #endregion
 #endregion
 
+#region Helper Funcs
+def handle_errors(e: Exception, target_name: str = None):
+    if isinstance(e, ValueError):
+        typer.echo(f"Error: {e}")
+    elif isinstance(e, IntegrityError):
+        typer.echo(f"Error: '{target_name}' already exists")
+    elif isinstance(e, OperationalError):
+        typer.echo(f"Database error: {e}")
+    else:
+        typer.echo(f"Unexpected error: {e}")
+
+#endregion
 #region App Entry
 if __name__ == "__main__":
     app()
