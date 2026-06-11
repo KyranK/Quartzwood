@@ -20,10 +20,21 @@ from quartzwood.services.collection import (
     update_storage as svc_update_storage,
     delete_storage as svc_delete_storage,
 )
-from quartzwood.services.scryfall import get_card_by_set_and_number
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 app = typer.Typer()
+
+#endregion
+#region Helper Funcs
+def handle_errors(e: Exception, target_name: str = None):
+    if isinstance(e, ValueError):
+        typer.echo(f"Error: {e}")
+    elif isinstance(e, IntegrityError):
+        typer.echo(f"Error: '{target_name}' already exists")
+    elif isinstance(e, OperationalError):
+        typer.echo(f"Database error: {e}")
+    else:
+        typer.echo(f"Unexpected error: {e}")
 
 #endregion
 #region Init
@@ -83,19 +94,20 @@ def update_collection(
     #endregion
     #region delete
 @app.command()
-def delete_collection(
+def rmv_collection( 
     collection_name: str,
     relocate_collection_name: str = Option(None, "--relocate", "-r"),
     force: bool = Option(False, "--force"),
 ):
     with get_session() as session:
         try:
-            svc_delete_collection(
+            collection = svc_delete_collection(
                 session,
                 collection_name = collection_name,
                 relocate_collection_name = relocate_collection_name,
                 force = force,
             )
+            typer.echo(f"Deleted Collection: {collection.name} ")
         except Exception as e:
             handle_errors(e, collection_name)
 
@@ -139,7 +151,7 @@ def update_storage(
 ):
     with get_session() as session:
         try:
-            svc_update_storage(
+            storage = svc_update_storage(
                 session,
                 name = name,
                 # New fields
@@ -147,6 +159,7 @@ def update_storage(
                 new_collection_name = new_collection_name, 
                 new_description = new_description,
             )
+            typer.echo(f"Updated Storage: {storage.name}")
         except Exception as e:
             handle_errors(e, name)
 
@@ -154,20 +167,21 @@ def update_storage(
     #endregion
     #region Delete
 @app.command()
-def delete_storage(
+def rmv_storage(
     storage_name: str,
     # Orphanage
     relocate_storage_name: str = Option(None, "--relocate", "-r"),
     force_flag: bool = Option(False, "--force"),
 ):
-     with get_session() as session:
+    with get_session() as session:
         try:
-            svc_delete_storage(
+            storage = svc_delete_storage(
                 session,
                 storage_name = storage_name,
                 relocate_storage_name = relocate_storage_name,
                 force_flag = force_flag,
             )
+            typer.echo(f"Storage Deleted: {storage.name}")
         except Exception as e:
             handle_errors(e, storage_name)
 
@@ -180,7 +194,7 @@ def add(
     set_number: str,
     set_code: str,
     condition: Condition,
-    quanitity: int = Option(1, "--quantity", "-q"),
+    quantity: int = Option(1, "--quantity", "-q"),
     storage_name: str = Option(None, "--storage-name", "-s"),
     foil_type: FoilType = Option(FoilType.none, "--foil", "-f"),
     stamp_type: StampType = Option(StampType.none, "--stamp", "-st"),
@@ -196,7 +210,7 @@ def add(
                 set_code=set_code,
                 condition=condition,
                 storage_name=storage_name,
-                quantity=quanitity,
+                quantity=quantity,
                 foil_type=foil_type,
                 stamp_type=stamp_type,
                 language=language,
@@ -207,7 +221,7 @@ def add(
             else:
                 typer.echo(f"Added {len(result)}x {result[0].name} ({result[0].set_code} {result[0].set_number}) {result[0].condition.value}")
         except Exception as e:
-            handle_errors(e, get_card_by_set_and_number(set_number, set_code))
+            handle_errors(e, f"{set_code} {set_number}")
 
     #endregion
     #region Read
@@ -257,7 +271,7 @@ def update(
             else:
                 typer.echo(f"Updated {len(cards)} card(s)")
         except Exception as e:
-            handle_errors(e, get_card_by_set_and_number(set_number, set_code))
+            handle_errors(e, f"{set_code} {set_number}")
 
 
     #endregion
@@ -288,21 +302,8 @@ def rmv_cards(
             else:
                 typer.echo(f"Removed {len(cards)} card(s)")
         except Exception as e:
-            handle_errors(e, get_card_by_set_and_number(set_number, set_code))
+            handle_errors(e, f"{set_code} {set_number}")
     #endregion
-#endregion
-
-#region Helper Funcs
-def handle_errors(e: Exception, target_name: str = None):
-    if isinstance(e, ValueError):
-        typer.echo(f"Error: {e}")
-    elif isinstance(e, IntegrityError):
-        typer.echo(f"Error: '{target_name}' already exists")
-    elif isinstance(e, OperationalError):
-        typer.echo(f"Database error: {e}")
-    else:
-        typer.echo(f"Unexpected error: {e}")
-
 #endregion
 #region App Entry
 if __name__ == "__main__":
