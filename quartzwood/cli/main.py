@@ -17,6 +17,7 @@ from quartzwood.services.collection import (
     delete_cards,
     update_collection as svc_update_collection,
     delete_collection as svc_delete_collection,
+    update_storage as svc_update_storage,
 )
 from sqlalchemy.exc import IntegrityError, OperationalError
 
@@ -40,10 +41,8 @@ def new_collection(name: str, description: str = None):
         try:
             collection = create_collection(session, name=name, description=description)
             typer.echo(f"Created collection: [{collection.id}] {collection.name}")
-        except ValueError as e:
-            typer.echo(f"Error: {e}")
-        except IntegrityError:
-            typer.echo(f"Error: '{name}' already exists")
+        except Exception as e:
+            handle_errors(e, name)
 
     #endregion
     #region Read
@@ -76,10 +75,8 @@ def update_collection(
             new_location = new_location,
             )
             typer.echo(f"Updated collection: {new_name if new_name else collection_name}")
-        except ValueError as e:
-            typer.echo(f"Error: {e}")
-        except IntegrityError:
-            typer.echo(f"Error: '{new_name}' already exists")
+        except Exception as e:
+            handle_errors(e, new_name if new_name else collection_name)
 
     #endregion
     #region delete
@@ -115,10 +112,8 @@ def new_storage(
         try:
             storage = create_storage(session, name=name, collection_name=collection_name, description=description)
             typer.echo(f"Created storage: [{storage.id}] {storage.name}")
-        except ValueError as e:
-            typer.echo(f"Error: {e}")
-        except IntegrityError:
-            typer.echo(f"Error: '{name}' already exists")
+        except Exception as e:
+            handle_errors(e, name)
 
     #endregion
     #region Read
@@ -132,7 +127,28 @@ def list_storage():
     
     #endregion
     #region Update
+@app.command()
+def update_storage(
+    name: str, 
+    # New fields
+    new_name: str = Option(None, "--new-name", "-N"),
+    new_collection_name: str = Option(None, "--relocate", "-r"),
+    new_description: str = Option(None, "--description", "-d"),
+):
+    with get_session() as session:
+        try:
+            svc_update_storage(
+                session,
+                name = name,
+                # New fields
+                new_name = new_name,
+                new_collection_name = new_collection_name, 
+                new_description = new_description,
+            )
+        except Exception as e:
+            handle_errors(e, name)
 
+    
     #endregion
     #region Delete
 
