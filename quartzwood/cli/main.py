@@ -1,3 +1,5 @@
+#File: cli/main.py
+
 import typer
 from typer import Argument, Option
 from quartzwood.db import get_session, init_db
@@ -17,14 +19,16 @@ from sqlalchemy.exc import IntegrityError
 
 app = typer.Typer()
 
-
+#region Init
 @app.command()
 def init():
     """Initialise the database."""
     init_db()
     typer.echo("Database initialised.")
 
-
+#endregion
+#region Collection
+    #region Create
 @app.command()
 def new_collection(name: str, description: str = None):
     """Create a new collection."""
@@ -37,7 +41,26 @@ def new_collection(name: str, description: str = None):
         except IntegrityError:
             typer.echo(f"Error: '{name}' already exists")
 
+    #endregion
+    #region Read
+@app.command()
+def list_collections():
+    """List all collections."""
+    with get_session() as session:
+        collections = get_all_collections(session)
+        for c in collections:
+            typer.echo(f"[{c.id}] {c.name}")
 
+    #endregion
+    #region Update
+
+    #endregion
+    #region delete
+
+    #endregion
+#endregion
+#region Storage
+    #region Create
 @app.command()
 def new_storage(
     name: str, 
@@ -54,7 +77,26 @@ def new_storage(
         except IntegrityError:
             typer.echo(f"Error: '{name}' already exists")
 
+    #endregion
+    #region Read
+@app.command()
+def list_storage():
+    """List all storage locations."""
+    with get_session() as session:
+        storages = get_all_storage(session)
+        for s in storages:
+            typer.echo(f"[{s.id}] {s.name} (collection: {s.collection_id})")
+    
+    #endregion
+    #region Update
 
+    #endregion
+    #region Delete
+
+    #endregion
+#endregion
+#region Cards
+    #region Create
 @app.command()
 def add(
     set_number: str,
@@ -89,34 +131,8 @@ def add(
         except ValueError as e:
             typer.echo(f"Error: {e}")
 
-
-@app.command()
-def list_collections():
-    """List all collections."""
-    with get_session() as session:
-        collections = get_all_collections(session)
-        for c in collections:
-            typer.echo(f"[{c.id}] {c.name}")
-            
-"""
-@app.command()
-def list_cards():
-    # List all cards.
-    with get_session() as session:
-        cards = get_all_cards(session)
-        for c in cards:
-            typer.echo(f"[{c.id}] {c.name} ({c.set_code} {c.set_number}) {c.condition.value} foil:{c.foil_type.value}")
-"""            
-
-@app.command()
-def list_storage():
-    """List all storage locations."""
-    with get_session() as session:
-        storages = get_all_storage(session)
-        for s in storages:
-            typer.echo(f"[{s.id}] {s.name} (collection: {s.collection_id})")
-
-
+    #endregion
+    #region Read
 @app.command()
 def list_cards():
     """List all cards."""
@@ -126,7 +142,8 @@ def list_cards():
             count = f"{g['count']}x " if g['count'] > 1 else ""
             typer.echo(f"{count}{g['name']} ({g['set_code']} {g['set_number']}) {g['condition']} foil:{g['foil_type']}")
 
-
+    #endregion
+    #region Update
 @app.command()
 def update(
     # Card
@@ -165,6 +182,8 @@ def update(
             typer.echo(f"Error: {e}")
 
 
+    #endregion
+    #region Delete
 @app.command()
 def rmv_cards(
     # Card
@@ -192,27 +211,10 @@ def rmv_cards(
                 typer.echo(f"Removed {len(cards)} card(s)")
         except ValueError as e:
             typer.echo(f"Error: {e}")
+    #endregion
+#endregion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#region App Entry
 if __name__ == "__main__":
     app()
+#endregion
