@@ -22,6 +22,8 @@ from quartzwood.services.collection import (
     get_storage_by_name as svc_get_storage_by_name,
     get_cards_by_storage as svc_get_cards_by_storage,
     get_grouped_cards_by_storage as svc_get_grouped_cards_by_storage,
+    get_collection_id_by_name as svc_get_collection_id_by_name,
+    get_storage_by_collection_id as svc_get_storage_by_collection_id,
 )
 from sqlalchemy.exc import IntegrityError, OperationalError
 from rich.table import Table
@@ -73,6 +75,45 @@ def list_collections():
         collections = get_all_collections(session)
         for c in collections:
             typer.echo(f"[{c.id}] {c.name}")
+
+
+@app.command()
+def view_collection(
+    collection_name: str
+):
+    with get_session() as session:
+        try:
+            # check collection exist -> get id
+            collection_id = svc_get_collection_id_by_name(session, collection_name)
+            if collection_id is None:
+                typer.echo(f"Collection '{collection_name}' not found")
+                return
+            
+            # get storages by collection_id
+            storages = svc_get_storage_by_collection_id(session, collection_id)
+            if storages is None:
+                storages = []
+            if not storages:
+                # Collection has no storages
+                # return empty table
+                pass
+
+            # table (Collection.name) [storage_name, size]
+            table = Table(title=f"{collection_name}")
+            table.add_column("Storage")
+            table.add_column("Cards Stored")
+
+            for storage in storages:
+                table.add_row(
+                    storage.name,
+                    # TODO: swap to COUNT query when moving to Postgres for library feature
+                    str(len(svc_get_cards_by_storage(session, storage.id)))
+                )
+            # print
+            console.print(table)
+
+        except Exception as e:
+            handle_errors(e, collection_name)
 
     #endregion
     #region Update

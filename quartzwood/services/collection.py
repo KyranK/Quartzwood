@@ -28,6 +28,7 @@ def get_collection_id_by_name(session: Session, collection_name: str) -> int | N
     collection = session.exec(select(Collection).where(Collection.name == collection_name)).first()
     return collection.id if collection else None
 
+
     #endregion
     #region update
 def update_collection(
@@ -124,9 +125,9 @@ def get_storage_id_by_name(session: Session, storage_name: str) -> int | None:
 def get_storage_by_collection_id(
         session: Session,
         collection_id: int
-) -> list[Storage] | None:
-    storages = session.exec(select(Storage).where(Storage.collection_id == collection_id)).all()
-    return storages if storages else None
+) -> list[Storage]:
+    return session.exec(select(Storage).where(Storage.collection_id == collection_id)).all()
+
 
 
 def get_storage_by_name(

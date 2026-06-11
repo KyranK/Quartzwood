@@ -20,6 +20,13 @@ qw list-collections
 qw list-storage
 qw list-cards
 
+# View
+qw view-collection Main
+qw view-collection "Trade Stock"
+qw view-storage RedBinder
+qw view-storage BlueBinder
+qw view-storage TradeBox
+
 # Update
 qw update 13 MH2 --new-condition LP -s RedBinder
 qw update 189 MH3 -S BlueBinder
