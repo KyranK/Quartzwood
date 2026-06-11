@@ -18,6 +18,7 @@ from quartzwood.services.collection import (
     update_collection as svc_update_collection,
     delete_collection as svc_delete_collection,
     update_storage as svc_update_storage,
+    delete_storage as svc_delete_storage,
 )
 from sqlalchemy.exc import IntegrityError, OperationalError
 
@@ -151,6 +152,23 @@ def update_storage(
     
     #endregion
     #region Delete
+@app.command()
+def delete_storage(
+    storage_name: str,
+    # Orphanage
+    relocate_storage_name: str = Option(None, "--relocate", "-r"),
+    force_flag: bool = Option(False, "--force"),
+):
+     with get_session() as session:
+        try:
+            svc_delete_storage(
+                session,
+                storage_name = storage_name,
+                relocate_storage_name = relocate_storage_name,
+                force_flag = force_flag,
+            )
+        except Exception as e:
+            handle_errors(e, storage_name)
 
     #endregion
 #endregion
