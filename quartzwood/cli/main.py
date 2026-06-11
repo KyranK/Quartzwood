@@ -20,6 +20,7 @@ from quartzwood.services.collection import (
     update_storage as svc_update_storage,
     delete_storage as svc_delete_storage,
 )
+from quartzwood.services.scryfall import get_card_by_set_and_number
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 app = typer.Typer()
@@ -205,8 +206,8 @@ def add(
                 typer.echo(f"Error: {result}")
             else:
                 typer.echo(f"Added {len(result)}x {result[0].name} ({result[0].set_code} {result[0].set_number}) {result[0].condition.value}")
-        except ValueError as e:
-            typer.echo(f"Error: {e}")
+        except Exception as e:
+            handle_errors(e, get_card_by_set_and_number(set_number, set_code))
 
     #endregion
     #region Read
@@ -255,8 +256,8 @@ def update(
                 typer.echo("No cards found matching those filters")
             else:
                 typer.echo(f"Updated {len(cards)} card(s)")
-        except ValueError as e:
-            typer.echo(f"Error: {e}")
+        except Exception as e:
+            handle_errors(e, get_card_by_set_and_number(set_number, set_code))
 
 
     #endregion
@@ -286,8 +287,8 @@ def rmv_cards(
                 typer.echo("No cards found matching those filters")
             else:
                 typer.echo(f"Removed {len(cards)} card(s)")
-        except ValueError as e:
-            typer.echo(f"Error: {e}")
+        except Exception as e:
+            handle_errors(e, get_card_by_set_and_number(set_number, set_code))
     #endregion
 #endregion
 
