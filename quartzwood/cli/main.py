@@ -12,7 +12,7 @@ from quartzwood.services.collection import (
     get_all_storage,
     add_card,
     get_all_cards,
-    get_cards_grouped,
+    get_cards_grouped as svc_get_cards_grouped,
     update_cards,
     delete_cards,
     update_collection as svc_update_collection,
@@ -21,6 +21,7 @@ from quartzwood.services.collection import (
     delete_storage as svc_delete_storage,
     get_storage_by_name as svc_get_storage_by_name,
     get_cards_by_storage as svc_get_cards_by_storage,
+    get_grouped_cards_by_storage as svc_get_grouped_cards_by_storage,
 )
 from sqlalchemy.exc import IntegrityError, OperationalError
 from rich.table import Table
@@ -147,7 +148,7 @@ def list_storage():
     
 
 @app.command()
-def view_command(
+def view_storage(
     storage_name: str,
 ):
     with get_session() as session:
@@ -157,21 +158,27 @@ def view_command(
                 typer.echo(f"Storage {storage_name} not found")
                 return
 
-            cards = svc_get_cards_by_storage(session, storage.id)
+            cards = svc_get_grouped_cards_by_storage(session, storage.id)
             if not cards:
                 # If storage has no cards
                 # that's ok just return empty table
                 pass
             
             table = Table(title=f"{storage_name}")
+            table.add_column("Count")
             table.add_column("Name")
             table.add_column("set Id")
             table.add_column("Condition")
             table.add_column("Foil")
 
             for card in cards:
-                table.add_row(card.name, card.set_number+"-"+card.set_code, card.condition.value, card.foil_type.value)
-
+                table.add_row(
+                    str(card["count"]),
+                    card["name"],
+                    card["set_number"] + "-" + card["set_code"],
+                    card["condition"],
+                    card["foil_type"]
+                )
             console.print(table)
         except Exception as e:
             handle_errors(e, storage_name)
@@ -266,7 +273,7 @@ def add(
 def list_cards():
     """List all cards."""
     with get_session() as session:
-        groups = get_cards_grouped(session)
+        groups = svc_get_cards_grouped(session)
         for g in groups:
             count = f"{g['count']}x " if g['count'] > 1 else ""
             typer.echo(f"{count}{g['name']} ({g['set_code']} {g['set_number']}) {g['condition']} foil:{g['foil_type']}")
