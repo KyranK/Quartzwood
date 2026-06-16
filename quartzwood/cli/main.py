@@ -11,7 +11,6 @@ from quartzwood.services.collection import (
     create_storage,
     get_all_storage,
     add_card,
-    get_all_cards,
     get_cards_grouped as svc_get_cards_grouped,
     update_cards,
     delete_cards,
@@ -24,6 +23,8 @@ from quartzwood.services.collection import (
     get_grouped_cards_by_storage as svc_get_grouped_cards_by_storage,
     get_collection_id_by_name as svc_get_collection_id_by_name,
     get_storage_by_collection_id as svc_get_storage_by_collection_id,
+    autocomplete_storage_names,
+    autocomplete_collection_names,
 )
 from sqlalchemy.exc import IntegrityError, OperationalError
 from rich.table import Table
@@ -79,7 +80,7 @@ def list_collections():
 
 @app.command()
 def view_collection(
-    collection_name: str
+    collection_name: str = Argument(..., autocompletion=autocomplete_collection_names)
 ):
     with get_session() as session:
         try:
@@ -190,7 +191,7 @@ def list_storage():
 
 @app.command()
 def view_storage(
-    storage_name: str,
+    storage_name: str = Argument(..., autocompletion=autocomplete_storage_names)
 ):
     with get_session() as session:
         try:
