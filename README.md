@@ -22,6 +22,7 @@ Requires Python 3.11+ and Poetry.
 git clone https://github.com/yourusername/quartzwood
 cd quartzwood
 poetry install
+poetry shell (for some linix)
 qw init
 ```
 
