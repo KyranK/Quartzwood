@@ -1,36 +1,65 @@
 #File: cli/main.py
 
 #region Imports
+    #region typer
 import typer
 from typer import Argument, Option
+    #endregion
+    #region sqlalchemy
+from sqlalchemy.exc import IntegrityError, OperationalError
+    #endregion
+    #region rich
+from rich.table import Table
+from rich.console import Console
+    #endregion
+    #region Quartzwood
 from quartzwood.db import get_session, init_db
 from quartzwood.models.enums import Condition, FoilType, StampType
-from quartzwood.services.collection import (
-    create_collection,
-    get_all_collections,
-    create_storage,
-    get_all_storage,
-    add_card,
-    get_cards_grouped as svc_get_cards_grouped,
-    update_cards,
-    delete_cards,
-    update_collection as svc_update_collection,
-    delete_collection as svc_delete_collection,
-    update_storage as svc_update_storage,
-    delete_storage as svc_delete_storage,
-    get_storage_by_name as svc_get_storage_by_name,
-    get_cards_by_storage as svc_get_cards_by_storage,
-    get_grouped_cards_by_storage as svc_get_grouped_cards_by_storage,
-    get_collection_id_by_name as svc_get_collection_id_by_name,
-    get_storage_by_collection_id as svc_get_storage_by_collection_id,
+
+from quartzwood.services.cli_helper import(
     autocomplete_storage_names,
     autocomplete_collection_names,
 )
-from sqlalchemy.exc import IntegrityError, OperationalError
-from rich.table import Table
-from rich.console import Console
+
+from quartzwood.services.cards import(
+    add_card,
+    get_cards_grouped as svc_get_cards_grouped,
+    get_cards_by_storage as svc_get_cards_by_storage,
+    get_grouped_cards_by_storage as svc_get_grouped_cards_by_storage,
+    update_cards,
+    delete_cards,
+)
+
+from quartzwood.services.storage import(
+    create_storage,
+    get_all_storage,
+    get_storage_by_collection_id as svc_get_storage_by_collection_id,
+    get_storage_by_name as svc_get_storage_by_name,
+    update_storage as svc_update_storage,
+    delete_storage as svc_delete_storage,
+)
+
+from quartzwood.services.collection import (
+    create_collection,
+    get_all_collections,
+    update_collection as svc_update_collection,
+    delete_collection as svc_delete_collection,
+
+
+
+    
+    get_collection_id_by_name as svc_get_collection_id_by_name,
+)
+    #endregion
+
+#endregion
+#region App
 app = typer.Typer()
 console = Console()  
+
+if __name__ == "__main__":
+    app()
+#endregion
 
 #endregion
 #region Helper Funcs
@@ -390,8 +419,4 @@ def rmv_cards(
         except Exception as e:
             handle_errors(e, f"{set_code} {set_number}")
     #endregion
-#endregion
-#region App Entry
-if __name__ == "__main__":
-    app()
 #endregion
