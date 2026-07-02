@@ -4,7 +4,6 @@
 from sqlmodel import Session, select
 from quartzwood.models.collection import Collection
 
-from quartzwood.services.storage import get_storage_by_collection_id
 #endregion
 
 #region Collection
@@ -76,6 +75,9 @@ def delete_collection(
     relocate_collection_name: str = None,
     force: bool = False
 ) -> Collection:
+    # local import to avoid circular dependency with storage.py
+    from quartzwood.services.storage import get_storage_by_collection_id
+
     collection_id = get_collection_id_by_name(session, collection_name)
     if collection_id is None:
         raise ValueError(f"Collection '{collection_name}' not found")
