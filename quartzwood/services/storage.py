@@ -6,7 +6,7 @@ from quartzwood.models.storage import Storage
 
 
 from quartzwood.services.collection import get_collection_id_by_name
-from quartzwood.services.storage import get_cards_by_storage
+from quartzwood.services.cards import get_cards_by_storage
 #endregion
 
 #region Storage

@@ -27,6 +27,15 @@ def get_collection_id_by_name(session: Session, collection_name: str) -> int | N
     return collection.id if collection else None
 
 
+def get_collection_by_name(session: Session, collection_name) -> Collection | None:
+    collection = session.exec(select(Collection).where(Collection.name == collection_name)).first()
+    return collection if collection else None
+
+
+def get_collections_by_entity_id(session: Session, entity_id) -> list[Collection]:
+    collections = session.exec(select(Collection).where(Collection.entity_id == entity_id))
+    return collections
+
     #endregion
     #region update
 def update_collection(
@@ -35,7 +44,8 @@ def update_collection(
         # update fields
         new_name: str = None,
         new_description: str = None,
-        new_location: str = None
+        new_location: str = None,
+        entity_id: int = None
 ) -> Collection:
     collection_id = get_collection_id_by_name(session, collection_name)
     if collection_id is None:
@@ -49,6 +59,8 @@ def update_collection(
         collection.description = new_description
     if new_location:
         collection.location = new_location
+    if entity_id:
+        collection.entity_id = entity_id
 
     session.add(collection)
     session.commit()
