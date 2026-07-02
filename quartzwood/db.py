@@ -11,6 +11,7 @@ def init_db():
     from quartzwood.models.collection import Collection
     from quartzwood.models.storage import Storage
     from quartzwood.models.card import CardInstance
+    from quartzwood.models.entity import Entity
 
     SQLModel.metadata.create_all(engine)
 

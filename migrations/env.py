@@ -22,6 +22,7 @@ from quartzwood.db import engine
 from quartzwood.models.collection import Collection
 from quartzwood.models.storage import Storage
 from quartzwood.models.card import CardInstance
+from quartzwood.models.entity import Entity
 from sqlmodel import SQLModel
 
 
@@ -72,7 +73,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata, render_as_batch=True
         )
 
         with context.begin_transaction():

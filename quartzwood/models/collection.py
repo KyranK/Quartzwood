@@ -7,4 +7,4 @@ class Collection(SQLModel, table=True):
     name: str = Field(unique=True)
     description: Optional[str] = None
     location: Optional[str] = None
-    # entity_id: Optional[int] = Field(default=None, foreign_key="entity.id")
+    entity_id: Optional[int] = Field(default=None, foreign_key="entity.id")
