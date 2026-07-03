@@ -14,7 +14,7 @@ from rich.console import Console
     #endregion
     #region Quartzwood
 from quartzwood.db import get_session, init_db
-from quartzwood.models.enums import Condition, FoilType, StampType
+from quartzwood.models.enums import Condition, FoilType, StampType, EntityType
 
 from quartzwood.services.cli_helper import(
     autocomplete_storage_names,
@@ -44,11 +44,18 @@ from quartzwood.services.collection import (
     get_all_collections,
     update_collection as svc_update_collection,
     delete_collection as svc_delete_collection,
-
-
-
     
     get_collection_id_by_name as svc_get_collection_id_by_name,
+)
+
+from quartzwood.services.entity import (
+    create_entity,
+    get_all_entities as svc_get_all_entities,
+    get_entity_by_name as svc_get_entity_by_name,
+    get_entity_id_by_name as svc_get_entity_id_by_name,
+    update_entity as svc_update_entity,
+    delete_entity as svc_delete_entity
+
 )
     #endregion
 
@@ -418,5 +425,89 @@ def rmv_cards(
                 typer.echo(f"Removed {len(cards)} card(s)")
         except Exception as e:
             handle_errors(e, f"{set_code} {set_number}")
+    #endregion
+#endregion
+#region Entities
+    #region Create
+@app.command()
+def new_entity(
+    name: str, 
+    type: EntityType = Option(EntityType.personal, "--type", "-t"),
+    location: str = Option(None, "--location", "-l")
+    ):
+    """Create a new Entity."""
+    with get_session() as session:
+        try:
+            entity = create_entity(session, name, type, location)
+            typer.echo(f"Created entity: [{entity.id}] {entity.name} ({entity.type.value})")
+        except Exception as e:
+            handle_errors(e, name)
+
+    #endregion
+    #region Read
+@app.command()
+def list_entities():
+    with get_session() as session:
+        try:
+            entities = svc_get_all_entities(session)
+            for entity in entities:
+                typer.echo(f"Entity [{entity.id}]: {entity.name} | ({entity.type.value}) ")
+        except Exception as e:
+            handle_errors(e)
+
+@app.command()
+def find_entity(
+    name: str = Option(None, "--name", "-n")
+):
+    with get_session() as session:
+        try:
+            entity = svc_get_entity_by_name(session, name)
+            if entity is None:
+                typer.echo(f"Entity '{name}' not found")
+                return
+            typer.echo(f"Entity [{entity.id}]: {entity.name} | ({entity.type.value}) ")
+        except Exception as e:
+            handle_errors(e, name)
+    
+    #endregion
+    #region Update
+@app.command()
+def update_entity(
+    name: str,
+    new_name: str = Option(None, "--new-name", "-N"),
+    new_type: EntityType = Option(None, "--new-type", "-T"),
+    new_location: str = Option(None, "--new-location", "-L")
+):
+    with get_session() as session:
+        try:
+            # find entity
+            entity = svc_get_entity_by_name(session, name)
+            if entity is None: # check valid
+                typer.echo(f"Entity '{name}' not found")
+                return
+            # update values
+            before = f"{entity.name} | ({entity.type.value}) | {entity.location}"
+
+            updated_entity = svc_update_entity(session, name, new_name, new_type, new_location)
+            typer.echo(f"Entity updated:")
+            typer.echo(f" {before} -> {updated_entity.name} | ({updated_entity.type.value}) | {updated_entity.location}")
+        except Exception as e:
+            handle_errors(e, name)
+
+    #endregion
+    #region Delete
+@app.command()
+def rmv_entity(
+    name: str,
+    # Orphanage
+    transfer_entity_name: str = Option(None, "--transfer-entity", "-T"),
+    force_flag: bool = Option(False, "--force"),
+    ):
+     with get_session() as session:
+        try:
+            entity = svc_delete_entity(session, name, transfer_entity_name, force_flag)
+            typer.echo(f"Entity deleted: {entity.name}, {entity.type.value}")
+        except Exception as e:
+            handle_errors(e, name)
     #endregion
 #endregion

@@ -1,9 +1,17 @@
 # Reset db
 Remove-Item quartzwood.db
-qw init
+alembic upgrade head
+
+# Entity
+qw new-entity "Me" --type personal
+qw new-entity "LocalShop" --type shop
+qw list-entities
+qw find-entity --name "Me"
+qw update-entity "Me" --new-location "Brisbane"
+qw update-entity "LocalShop" --new-name "CardShop"
 
 # Setup
-qw new-collection "Main"
+qw new-collection "Main" 
 qw new-collection "Trade Stock"
 qw new-storage "RedBinder" -c "Main"
 qw new-storage "BlueBinder" -c "Main"
@@ -16,31 +24,22 @@ qw add 189 MH3 LP -s BlueBinder
 qw add 13 MH2 NM -s TradeBox -q 2 -f traditional
 
 # List
+qw list-entities
 qw list-collections
 qw list-storage
 qw list-cards
 
 # View
 qw view-collection Main
-qw view-collection "Trade Stock"
 qw view-storage RedBinder
-qw view-storage BlueBinder
-qw view-storage TradeBox
 
-# Update
-qw update 13 MH2 --new-condition LP -s RedBinder
-qw update 189 MH3 -S BlueBinder
+# Entity delete tests
+qw new-entity "TempEntity"
+qw new-collection "TempCollection"
+qw rmv-entity "TempEntity"                              # should fail - has collection? no, so should pass
+qw rmv-entity "CardShop" --force                        # orphan collections
 
-# Storage operations
-qw update-storage RedBinder --relocate "Trade Stock"
-qw rmv-storage TradeBox --relocate BlueBinder
-qw rmv-storage BlueBinder --force
-
-# Collection operations
-qw rmv-collection "Trade Stock" --relocate "Main"
-qw rmv-collection "Main" --force
-
-# Error cases (should fail cleanly)
-qw add 999 XXX NM
-qw new-collection "Main"
-qw rmv-storage RedBinder
+# Error cases
+qw new-entity "Me"                                      # duplicate
+qw find-entity --name "Nobody"                          # not found
+qw rmv-entity "Nobody"                                  # not found

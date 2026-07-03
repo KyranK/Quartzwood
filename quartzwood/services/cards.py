@@ -6,7 +6,7 @@ from quartzwood.models.card import CardInstance
 from quartzwood.models.enums import Condition, FoilType, StampType
 from quartzwood.services.scryfall import get_card_by_set_and_number, extract_card_fields
 
-from quartzwood.services.storage import get_storage_id_by_name
+
 #endregion
 
 #region Cards
@@ -23,6 +23,9 @@ def add_card(
     language: str = "en",
     notes: str = None,
 ) -> list[CardInstance] | str:
+    # Local import to avoid circular dependancy with storage.py
+    from quartzwood.services.storage import get_storage_id_by_name
+
     """
     Resolves card via Scryfall then writes to DB.
     Returns the CardInstance on success, or an error string on failure.
@@ -120,6 +123,8 @@ def get_cards_filtered(
     foil_type: FoilType = None,
     storage_name: str = None,
 ) -> list[CardInstance]:
+    # Local import to avoid circular dependancy with storage.py
+    from quartzwood.services.storage import get_storage_id_by_name
     
     query = select(CardInstance).where(
         CardInstance.set_number == set_number,
@@ -152,6 +157,8 @@ def update_cards(
     new_storage_name: str = None,
     new_notes: str = None,
 ) -> list[CardInstance]:
+    # Local import to prevent circular import with storage.py
+    from quartzwood.services.storage import get_storage_id_by_name
     
     cards = get_cards_filtered(
       session = session,
