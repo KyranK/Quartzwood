@@ -1,16 +1,14 @@
 #File: cli/main.py
 
 #region Imports
-    #region typer
+    #region modules
 import typer
 from typer import Argument, Option
-    #endregion
-    #region sqlalchemy
 from sqlalchemy.exc import IntegrityError, OperationalError
-    #endregion
-    #region rich
 from rich.table import Table
 from rich.console import Console
+import json
+from pathlib import Path
     #endregion
     #region Quartzwood
 from quartzwood.db import get_session, init_db
@@ -54,9 +52,10 @@ from quartzwood.services.entity import (
     get_entity_by_name as svc_get_entity_by_name,
     get_entity_id_by_name as svc_get_entity_id_by_name,
     update_entity as svc_update_entity,
-    delete_entity as svc_delete_entity
-
+    delete_entity as svc_delete_entity,
+    seed_default_entity as svc_seed_default_entity
 )
+
     #endregion
 
 #endregion
@@ -86,7 +85,17 @@ def handle_errors(e: Exception, target_name: str = None):
 @app.command()
 def init():
     """Initialise the database."""
-    init_db()
+    init_db() #Generate DB
+
+    # Seed DB
+    config_path = Path(__file__).parent.parent / "config" / "entity_seed.json"
+    with open(config_path) as f:
+        config = json.load(f)
+    with get_session() as session:
+        try:
+            svc_seed_default_entity(session, config)
+        except Exception as e:
+            handle_errors(e)
     typer.echo("Database initialised.")
 
     #endregion

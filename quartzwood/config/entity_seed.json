@@ -1,0 +1,16 @@
+{
+    "entity": {
+        "name": "Me",
+        "type": "personal",
+        "location": null
+    },
+    "collections": [
+        {"name": "Main"},
+        {"name": "Trade"},
+        {"name": "Unsorted"}
+    ],
+    "storages": [
+        {"name": "UnsortedBox", "collection_name": "Unsorted"},
+        {"name": "TradeBox", "collection_name": "Trade"}
+    ]
+}

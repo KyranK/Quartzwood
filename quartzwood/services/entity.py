@@ -5,9 +5,6 @@ from sqlmodel import Session, select
 from quartzwood.models.entity import Entity
 
 from quartzwood.models.enums import EntityType
-from quartzwood.models.collection import Collection
-from quartzwood.services.collection import get_collection_by_name, get_collections_by_entity_id, update_collection
-
 #endregion
 
 #region Entity
@@ -25,6 +22,23 @@ def create_entity(
     session.refresh(entity)
     return entity
 
+
+# quartzwood/services/entity.py — add this function
+
+def seed_default_entity(
+    session: Session,
+    config: dict
+):
+    # Local import(s) to avoid circular dependancies
+    from quartzwood.services.collection import create_collection
+    from quartzwood.services.storage import create_storage
+    
+
+    create_entity(session, **config["entity"])
+    for c in config["collections"]:
+        create_collection(session, **c)
+    for s in config["storages"]:
+        create_storage(session, **s)
     #endregion
     #region Read
 def get_all_entities(session: Session) -> list[Entity]:

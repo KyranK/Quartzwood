@@ -1,6 +1,10 @@
 # Reset db
 Remove-Item quartzwood.db
 alembic upgrade head
+qw init                  # now seeds default entity/collections/storage
+qw list-entities         # should show "Me"
+qw list-collections      # should show Main, Trade, Unsorted
+qw list-storage          # should show UnsortedBox, TradeBox
 
 # Entity
 qw new-entity "Me" --type personal
