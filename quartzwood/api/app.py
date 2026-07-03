@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from pathlib import Path
 
 app = FastAPI()
-templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+templates = Jinja2Templates(directory=Path(__file__).parent / "ginger_male")
 
 import uvicorn
 
