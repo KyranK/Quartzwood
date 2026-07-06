@@ -2,13 +2,20 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from quartzwood.api.app import app, templates
 from quartzwood.db import get_session
-from quartzwood.services.cards import get_cards_grouped
+from quartzwood.services.cards import(
+    get_cards_grouped,
+    get_grouped_cards_by_storage,
+    get_all_cards
+)
 from quartzwood.services.collection import (
     get_all_collections,
     get_collections_by_entity_id,
     get_collection_by_name
     )
-from quartzwood.services.storage import get_all_storage
+from quartzwood.services.storage import(
+    get_all_storage,
+    get_storage_by_name
+)
 from quartzwood.services.entity import get_all_entities
 
 #region Jinja2 (temporary)
@@ -32,33 +39,58 @@ def index(request: Request):
 #region JSON API
     #region Entites
 @app.get("/api/entities")
-def api_entities():
+def api_get_all_entities():
     with get_session() as session:
         entities = get_all_entities(session)
         return [{"id": e.id, "name": e.name, "type": e.type.value, "location": e.location} for e in entities]
     #endregion
     #region Collections
-@app.get("/api/collections/")
-def api_collections():
+@app.get("/api/collections/") # All Collections
+def api_get_all_collections():
     with get_session() as session:
         collections = get_all_collections(session)
         return [{"id": c.id, "name": c.name, "description": c.description, "location": c.location, "owner_id": c.entity_id,} for c in collections]
 
-@app.get("/api/collections/{name_id}")
-def api_collections(name_id: str):
+@app.get("/api/collections/{name_id}") # Collections by name
+def api_get_all_collections(name_id: str):
     with get_session() as session:
         c = get_collection_by_name(session, name_id)
         if c:
             return [{"id": c.id, "name": c.name, "description": c.description, "location": c.location, "owner_id": c.entity_id}]
 
-@app.get("/api/collections/{entity_id}")
-def api_collections(entity_id: int):
+@app.get("/api/entities/{entity_id}/collections") # Collections by entity(id)
+def api_get_collections_by_entity(entity_id: int):
     with get_session() as session:
         collections = get_collections_by_entity_id(session, entity_id)
         return [{"id": c.id, "name": c.name, "description": c.description, "location": c.location, "owner_id": c.entity_id,} for c in collections]
-
     #endregion
-
+    #region Storages
+@app.get("/api/storage") # All storages
+def api_get_all_storage():
+    with get_session() as session:
+        storages = get_all_storage(session)
+        return[{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
     
+@app.get("/api/storage/{storage_name}") # All storages
+def api_get_storage_by_name(storage_name: str):
+    with get_session() as session:
+        storages = get_storage_by_name(session, storage_name)
+        if storages:
+            return[{"id": storages.id, "name": storages.name, "description": storages.description, "collection_id": storages.collection_id}]    
+    #endregion
+    #region Cards
+@app.get("/api/cards")
+def api_get_all_cards():
+    with get_session() as session:
+        return get_all_cards(session)
+
+@app.get("/api/storage/{storage_name}/cards")
+def api_get_cards_by_storage(storage_name: str):
+    with get_session() as session:
+        storage = get_storage_by_name(session, storage_name)
+        if storage is None:
+            return []
+        return get_grouped_cards_by_storage(session, storage.id)
+    #endregion
 
 #endregion
