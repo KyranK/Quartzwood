@@ -85,6 +85,7 @@ def get_grouped_cards_by_storage(session: Session, storage_id: int) -> list[dict
             groups[key]["count"] += 1
         else:
             groups[key] = {
+                "scryfall_id": card.scryfall_id, 
                 "name": card.name,
                 "set_code": card.set_code,
                 "set_number": card.set_number,
