@@ -1,14 +1,17 @@
 import { Routes, Route } from 'react-router-dom'
-//import HomePage from './pages/HomePage.tsx'
-//import CollectionPage from './pages/CollectionPage.tsx'
-//import StoragePage from './pages/StoragePage.tsx'
+import HomePage from './pages/HomePage.tsx'
+import CollectionPage from './pages/CollectionPage.tsx'
+
 
 function App() {
   return (
-    <div className="bg-blue-500 text-white p-4">
-      Tailwind is working
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/collection/:name" element={<CollectionPage />} />
+    </Routes>
   )
 }
 
 export default App
+
+

@@ -14,7 +14,8 @@ from quartzwood.services.collection import (
     )
 from quartzwood.services.storage import(
     get_all_storage,
-    get_storage_by_name
+    get_storage_by_name,
+    get_storage_by_collection_id
 )
 from quartzwood.services.entity import get_all_entities
 
@@ -77,6 +78,15 @@ def api_get_storage_by_name(storage_name: str):
         storages = get_storage_by_name(session, storage_name)
         if storages:
             return[{"id": storages.id, "name": storages.name, "description": storages.description, "collection_id": storages.collection_id}]    
+        
+@app.get("/api/storage/by-collection/{collection_name}")
+def api_get_storage_by_collection(collection_name: str):
+    with get_session() as session:
+        collection = get_collection_by_name(session, collection_name)
+        if collection is None:
+            return []
+        storages = get_storage_by_collection_id(session, collection.id)
+        return [{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
     #endregion
     #region Cards
 @app.get("/api/cards")
