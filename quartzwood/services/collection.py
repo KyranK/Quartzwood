@@ -35,6 +35,9 @@ def get_collections_by_entity_id(session: Session, entity_id) -> list[Collection
     collections = session.exec(select(Collection).where(Collection.entity_id == entity_id)).all()
     return collections
 
+def get_collection_by_id(session: Session, col_id: int) -> Collection | None:
+    return session.get(Collection, col_id)
+
     #endregion
     #region update
 def update_collection(
