@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Panel from '../components/panels/panel'
+import CardDetails from '../components/panels/cardDetails'
+import CardSelection from '../components/panels/cardSelection'
 
 interface Card {
     id: number | null
@@ -33,24 +35,24 @@ export default function StoragePage() {
 
     const handleCardClick = (c: Card) => {
         console.log("@ ImgClick")
-        setShowPanel(true)
-        /*if (c.count === 1 && c.id) {
+        if (c.count === 1 && c.id) {
             // fetch single instance details
             client.get<Card>(`/card/${c.id}`)
                 .then(res => {
-                    //setPanelCard(res.data)
-                    //setPanelInstances(null)
-                    setShowPanel(true)
+                    setPanelCard(res.data)
+                    setPanelInstances(null)
+                    
                 })
         } else {
             // fetch all instances
             client.get<Card[]>(`/storage/${name}/cards/${c.set_code}/${c.set_number}`)
                 .then(res => {
-                    //setPanelInstances(res.data)
-                    //setPanelCard(null)
-                    setShowPanel(true)
+                    setPanelInstances(res.data)
+                    setPanelCard(null)
+                    
                 })
-        }*/
+        }
+        setShowPanel(true)
     }
 
     useEffect(() => {
@@ -61,12 +63,21 @@ export default function StoragePage() {
 
     if (loading) return <LoadingSpinner />
 
+    let panelContent;
+
+    if (panelCard) {
+        panelContent = <CardDetails c={panelCard} />;
+    } else if (panelInstances !== null && panelInstances[0]) {
+        panelContent = <CardSelection cards={panelInstances} />;
+    } else {
+        panelContent = null;}
+
     return (
         <div className="p-8">
-            <Panel 
-                showPanel={showPanel} 
+            <Panel
+                showPanel={showPanel}
                 onClose={() => setShowPanel(false)}
-                context = {<LoadingSpinner />}
+                context={panelContent}
             />
             <button
                 onClick={() => navigate(-1)}

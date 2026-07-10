@@ -5,7 +5,9 @@ from quartzwood.db import get_session
 from quartzwood.services.cards import(
     get_cards_grouped,
     get_grouped_cards_by_storage,
-    get_all_cards
+    get_all_cards,
+    get_card_by_id,
+    get_cards_filtered,
 )
 from quartzwood.services.collection import (
     get_all_collections,
@@ -114,11 +116,11 @@ def api_get_cards_by_storage(storage_name: str):
         if storage is None:
             return []
         return get_grouped_cards_by_storage(session, storage.id)
-"""
+
 @app.get("/api/card/{card_id}")
 def api_get_card(card_id: int):
     with get_session() as session:
-        card = session.get(CardInstance, card_id)
+        card = get_card_by_id(session, card_id)
         if card is None:
             return JSONResponse(status_code=404, content={"detail": "Card not found"})
         return {
@@ -137,19 +139,23 @@ def api_get_card(card_id: int):
             "purchase_price": card.purchase_price,
         }
     
-@app.put("/api/card/{card_id}")
-def api_update_card(card_id: int, data: dict):
+@app.get("/api/storage/{storage_name}/cards/{set_code}/{set_number}")
+def api_get_collated_storage_cards(
+    storage_name: str,
+    set_code: str,
+    set_number: int
+):
     with get_session() as session:
-        card = session.get(CardInstance, card_id)
-        if card is None:
-            return JSONResponse(status_code=404, content={"detail": "Card not found"})
-        for key, value in data.items():
-            setattr(card, key, value)
-        session.add(card)
-        session.commit()
-        session.refresh(card)
-        return {"success": True}
-"""
+        storage = get_storage_by_name(session, storage_name)
+        if storage is None:
+            return []
+        cards = get_cards_filtered(
+            session, set_number, set_code,
+            storage_name=storage_name
+        )
+        return cards
+
+
     #endregion
 
 #endregion

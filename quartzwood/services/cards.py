@@ -144,6 +144,9 @@ def get_cards_filtered(
 
     return session.exec(query).all()
 
+
+def get_card_by_id(session: Session, card_id: int) -> CardInstance | None:
+    return session.get(CardInstance, card_id)
     #endregion
     #region Update
 def update_cards(
