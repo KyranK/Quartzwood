@@ -37,18 +37,18 @@ export default function StoragePage() {
         console.log("@ ImgClick")
         setPanelCard(null)
         setPanelInstances(null)
-        if (c.count === 1 && c.id) {
-            // fetch single instance details
+
+        if (c.id) {
+            // This is an individual card instance, so show its details.
             client.get<Card>(`/card/${c.id}`)
                 .then(res => {
                     setPanelCard(res.data)
-                    
                 })
         } else {
-            // fetch all instances
+            // This is a grouped card, so show the matching instances.
             client.get<Card[]>(`/storage/${name}/cards/${c.set_code}/${c.set_number}`)
                 .then(res => {
-                    setPanelInstances(res.data)      
+                    setPanelInstances(res.data)
                 })
         }
         setShowPanel(true)
@@ -67,7 +67,7 @@ export default function StoragePage() {
     if (panelCard) {
         panelContent = <CardDetails c={panelCard} />;
     } else if (panelInstances !== null && panelInstances[0]) {
-        panelContent = <CardSelection cards={panelInstances} />;
+        panelContent = <CardSelection cards={panelInstances} onSelectCard={handleCardClick} />;
     } else {
         panelContent = <LoadingSpinner />;}
 
