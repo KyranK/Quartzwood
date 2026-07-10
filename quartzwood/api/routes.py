@@ -21,6 +21,9 @@ from quartzwood.services.storage import(
     get_storage_by_collection_id
 )
 from quartzwood.services.entity import get_all_entities
+from quartzwood.services.scryfall import(
+    get_card_by_set_and_number
+)
 
 #region Jinja2 (temporary)
 @app.get("/", response_class=HTMLResponse)
@@ -154,8 +157,7 @@ def api_get_collated_storage_cards(
             storage_name=storage_name
         )
         return cards
-
-
     #endregion
-
+    #region Scryfall
+    #endregion
 #endregion
