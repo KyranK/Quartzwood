@@ -114,6 +114,42 @@ def api_get_cards_by_storage(storage_name: str):
         if storage is None:
             return []
         return get_grouped_cards_by_storage(session, storage.id)
+"""
+@app.get("/api/card/{card_id}")
+def api_get_card(card_id: int):
+    with get_session() as session:
+        card = session.get(CardInstance, card_id)
+        if card is None:
+            return JSONResponse(status_code=404, content={"detail": "Card not found"})
+        return {
+            "id": card.id,
+            "name": card.name,
+            "set_code": card.set_code,
+            "set_number": card.set_number,
+            "scryfall_id": card.scryfall_id,
+            "condition": card.condition.value,
+            "foil_type": card.foil_type.value,
+            "stamp_type": card.stamp_type.value,
+            "language": card.language,
+            "notes": card.notes,
+            "storage_id": card.storage_id,
+            "acquired_date": str(card.acquired_date) if card.acquired_date else None,
+            "purchase_price": card.purchase_price,
+        }
+    
+@app.put("/api/card/{card_id}")
+def api_update_card(card_id: int, data: dict):
+    with get_session() as session:
+        card = session.get(CardInstance, card_id)
+        if card is None:
+            return JSONResponse(status_code=404, content={"detail": "Card not found"})
+        for key, value in data.items():
+            setattr(card, key, value)
+        session.add(card)
+        session.commit()
+        session.refresh(card)
+        return {"success": True}
+"""
     #endregion
 
 #endregion

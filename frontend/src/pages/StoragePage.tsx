@@ -2,15 +2,23 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import LoadingSpinner from '../components/LoadingSpinner'
+import Panel from '../components/panels/panel'
 
 interface Card {
+    id: number | null
     name: string
     set_code: string
     set_number: string
+    scryfall_id: string
     condition: string
     foil_type: string
     count: number
-    scryfall_id: string
+    // instance-level fields (null when grouped)
+    stamp_type?: string
+    language?: string
+    notes?: string | null
+    acquired_date?: string | null
+    purchase_price?: number | null
 }
 
 export default function StoragePage() {
@@ -18,6 +26,32 @@ export default function StoragePage() {
     const [cards, setCards] = useState<Card[]>([])
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
+    const [panelCard, setPanelCard] = useState<Card | null>(null)
+    const [panelInstances, setPanelInstances] = useState<Card[] | null>(null)
+    const [showPanel, setShowPanel] = useState(false)
+
+
+    const handleCardClick = (c: Card) => {
+        console.log("@ ImgClick")
+        setShowPanel(true)
+        /*if (c.count === 1 && c.id) {
+            // fetch single instance details
+            client.get<Card>(`/card/${c.id}`)
+                .then(res => {
+                    //setPanelCard(res.data)
+                    //setPanelInstances(null)
+                    setShowPanel(true)
+                })
+        } else {
+            // fetch all instances
+            client.get<Card[]>(`/storage/${name}/cards/${c.set_code}/${c.set_number}`)
+                .then(res => {
+                    //setPanelInstances(res.data)
+                    //setPanelCard(null)
+                    setShowPanel(true)
+                })
+        }*/
+    }
 
     useEffect(() => {
         client.get<Card[]>(`/storage/${name}/cards`)
@@ -29,6 +63,11 @@ export default function StoragePage() {
 
     return (
         <div className="p-8">
+            <Panel 
+                showPanel={showPanel} 
+                onClose={() => setShowPanel(false)}
+                context = {<LoadingSpinner />}
+            />
             <button
                 onClick={() => navigate(-1)}
                 className="mb-4 text-blue-500 hover:underline"
@@ -51,6 +90,7 @@ export default function StoragePage() {
                             src={`https://api.scryfall.com/cards/${c.scryfall_id}?format=image&version=normal`}
                             alt={c.name}
                             className="w-full rounded-lg shadow"
+                            onClick={(event) => handleCardClick(c)}
                         />
                         {c.count > 1 && (
                             <span className="absolute top-1 right-1 bg-white/50 text-black text-s font-bold w-7 h-7 rounded-full flex items-center justify-center">

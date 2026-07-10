@@ -83,6 +83,7 @@ def get_grouped_cards_by_storage(session: Session, storage_id: int) -> list[dict
         key = (card.name, card.set_code, card.set_number, card.condition, card.foil_type)
         if key in groups:
             groups[key]["count"] += 1
+            groups[key]["id"] = None  # multiple instances, no single id
         else:
             groups[key] = {
                 "scryfall_id": card.scryfall_id, 
@@ -91,7 +92,8 @@ def get_grouped_cards_by_storage(session: Session, storage_id: int) -> list[dict
                 "set_number": card.set_number,
                 "condition": card.condition.value,
                 "foil_type": card.foil_type.value,
-                "count": 1
+                "count": 1,
+                "id": card.id,
             }
     return list(groups.values())
 
