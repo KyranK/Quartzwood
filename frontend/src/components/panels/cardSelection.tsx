@@ -12,7 +12,6 @@ function CardSelection({ cards }: CardSelectionProps) {
                 <p> {c.name} </p>
                 )}
             </div>
-            <LoadingSpinner />
         </>
     )
 }

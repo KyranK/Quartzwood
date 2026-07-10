@@ -9,7 +9,6 @@ function CardDetails({ c }: CardDetailsProps) {
     return (
         <>
             <p>{c.name}</p>
-            <LoadingSpinner />
         </>
     )
 }

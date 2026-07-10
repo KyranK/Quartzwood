@@ -35,21 +35,20 @@ export default function StoragePage() {
 
     const handleCardClick = (c: Card) => {
         console.log("@ ImgClick")
+        setPanelCard(null)
+        setPanelInstances(null)
         if (c.count === 1 && c.id) {
             // fetch single instance details
             client.get<Card>(`/card/${c.id}`)
                 .then(res => {
                     setPanelCard(res.data)
-                    setPanelInstances(null)
                     
                 })
         } else {
             // fetch all instances
             client.get<Card[]>(`/storage/${name}/cards/${c.set_code}/${c.set_number}`)
                 .then(res => {
-                    setPanelInstances(res.data)
-                    setPanelCard(null)
-                    
+                    setPanelInstances(res.data)      
                 })
         }
         setShowPanel(true)
@@ -70,7 +69,7 @@ export default function StoragePage() {
     } else if (panelInstances !== null && panelInstances[0]) {
         panelContent = <CardSelection cards={panelInstances} />;
     } else {
-        panelContent = null;}
+        panelContent = <LoadingSpinner />;}
 
     return (
         <div className="p-8">
