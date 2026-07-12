@@ -1,8 +1,15 @@
 import type Card from "../../interfaces/card"
 import LoadingSpinner from "../LoadingSpinner"
+import DeleteButton from "../buttons/DeleteButton"
+import EditButton from "../buttons/EditButton"
+import { func, string } from "prop-types"
 
 interface CardDetailsProps {
     c: Card
+}
+
+function handleDeleteCard(c_id: number | null){
+    console.log("Request to delete card: " + ({c_id}) )
 }
 
 function CardDetails({ c }: CardDetailsProps) {
@@ -41,6 +48,11 @@ function CardDetails({ c }: CardDetailsProps) {
                     </div>
                 </dl>
             </div>
+            <div className="flex w-full justify-between gap-2">
+                <DeleteButton onConfirm={() => handleDeleteCard(c.id)} />
+                <EditButton onConfirm={() => handleDeleteCard(c.id)} />    
+            </div>
+            
         </div>
     )
 }
