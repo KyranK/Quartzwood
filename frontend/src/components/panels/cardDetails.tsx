@@ -11,6 +11,13 @@ interface CardDetailsProps {
 function handleDeleteCard(c_id: number | null){
     console.log("Request to delete card: " + ({c_id}) )
 }
+function hanleEditCard(c_id: number | null){
+    console.log("Request to edit card: " + ({c_id}) )
+}
+function handleRevertCardEdit(c_id: number | null){
+    console.log("Request to revert card edit: " + ({c_id}) )    
+}
+
 
 function CardDetails({ c }: CardDetailsProps) {
     return (
@@ -50,7 +57,7 @@ function CardDetails({ c }: CardDetailsProps) {
             </div>
             <div className="flex w-full justify-between gap-2">
                 <DeleteButton onConfirm={() => handleDeleteCard(c.id)} />
-                <EditButton onConfirm={() => handleDeleteCard(c.id)} />    
+                <EditButton onConfirm={() => (hanleEditCard(c.id))} OnReset={() => (handleRevertCardEdit(c.id))} />    
             </div>
             
         </div>
