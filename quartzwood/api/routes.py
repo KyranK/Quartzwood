@@ -1,7 +1,9 @@
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import Body
 from quartzwood.api.app import app, templates
 from quartzwood.db import get_session
+from quartzwood.models.card import CardInstance
 from quartzwood.services.cards import(
     get_cards_grouped,
     get_grouped_cards_by_storage,
@@ -22,8 +24,10 @@ from quartzwood.services.storage import(
 )
 from quartzwood.services.entity import get_all_entities
 from quartzwood.services.scryfall import(
-    get_card_by_set_and_number
+    get_card_by_set_and_number,
+    extract_card_fields
 )
+
 
 #region Jinja2 (temporary)
 @app.get("/", response_class=HTMLResponse)
@@ -157,7 +161,40 @@ def api_get_collated_storage_cards(
             storage_name=storage_name
         )
         return cards
+    
+@app.put("/api/card/{card_id}")
+def api_update_card(card_id: int, data: dict = Body(...)):
+    with get_session() as session:
+        card = get_card_by_id(session, card_id)
+        if card is None:
+            return JSONResponse(status_code=404, content={"detail": "Not found"})
+        for key, value in data.items():
+            if hasattr(card, key):
+                setattr(card, key, value)
+        session.add(card)
+        session.commit()
+        return {"success": True}
     #endregion
     #region Scryfall
+@app.post("/api/card/{card_id}/refresh-scryfall")
+def api_refresh_scryfall(card_id: int):
+    print(f"refresh-scryfall called for card {card_id}")  # ← first line
+    with get_session() as session:
+        card = session.get(CardInstance, card_id)
+        if card is None:
+            return JSONResponse(status_code=404, content={"detail": "Not found"})
+        
+        print(f"Refreshing: {card.set_code} {card.set_number}")
+        scryfall_data = get_card_by_set_and_number(card.set_number, card.set_code)
+        if scryfall_data is None:
+            return JSONResponse(status_code=404, content={"detail": "Card not found on Scryfall"})
+        print(f"Refreshing: {card.set_code} {card.set_number}")
+
+        fields = extract_card_fields(scryfall_data)
+        card.scryfall_id = fields["scryfall_id"]
+        card.name = fields["name"]
+        session.add(card)
+        session.commit()
+        return {"success": True}
     #endregion
 #endregion
