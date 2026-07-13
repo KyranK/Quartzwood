@@ -5,6 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import Panel from '../components/panels/panel'
 import CardDetails from '../components/panels/cardDetails'
 import CardSelection from '../components/panels/cardSelection'
+import CardDisplay from '../components/panels/cardDisplay'
 
 interface Card {
     id: number | null
@@ -65,7 +66,7 @@ export default function StoragePage() {
     let panelContent;
 
     if (panelCard) {
-        panelContent = <CardDetails c={panelCard} />;
+        panelContent = <CardDisplay card={panelCard} />;
     } else if (panelInstances !== null && panelInstances[0]) {
         panelContent = <CardSelection cards={panelInstances} onSelectCard={handleCardClick} />;
     } else {
