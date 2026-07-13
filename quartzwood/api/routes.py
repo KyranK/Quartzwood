@@ -10,6 +10,7 @@ from quartzwood.services.cards import(
     get_all_cards,
     get_card_by_id,
     get_cards_filtered,
+    add_card
 )
 from quartzwood.services.collection import (
     get_all_collections,
@@ -174,11 +175,32 @@ def api_update_card(card_id: int, data: dict = Body(...)):
         session.add(card)
         session.commit()
         return {"success": True}
+    
+@app.post("/api/cards")
+def api_add_card(data: dict = Body(...)):
+    with get_session() as session:
+        try:
+            result = add_card(
+                session=session,
+                set_number=data["set_number"],
+                set_code=data["set_code"],
+                condition=data["condition"],
+                storage_name=data.get("storage_name"),
+                foil_type=data.get("foil_type", "none"),
+                stamp_type=data.get("stamp_type", "none"),
+                language=data.get("language", "en"),
+                notes=data.get("notes"),
+                quantity=data.get("quantity", 1),
+            )
+            if isinstance(result, str):
+                return JSONResponse(status_code=400, content={"detail": result})
+            return {"success": True, "count": len(result)}
+        except ValueError as e:
+            return JSONResponse(status_code=400, content={"detail": str(e)})
     #endregion
     #region Scryfall
 @app.post("/api/card/{card_id}/refresh-scryfall")
 def api_refresh_scryfall(card_id: int):
-    print(f"refresh-scryfall called for card {card_id}")  # ← first line
     with get_session() as session:
         card = session.get(CardInstance, card_id)
         if card is None:
