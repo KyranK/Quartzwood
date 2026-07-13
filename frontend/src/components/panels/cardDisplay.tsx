@@ -5,14 +5,14 @@ import EditButton from "../buttons/EditButton"
 import { func, string } from "prop-types"
 import CardDetails from "./cardDetails"
 import { useState } from "react"
+import CardEdit from "./cardEdit"
 
 interface CardDisplayProps {
     card: Card
 }
 
-
-
 function CardDisplay({ card }: CardDisplayProps) {
+
     //
     const [editmode, seteditmode] = useState(false)
 
@@ -29,10 +29,14 @@ function CardDisplay({ card }: CardDisplayProps) {
         <>
         <div className="p-2">
             {!editmode && <CardDetails card={card} />}
-            {editmode && <div>Edit mode</div>}
+            {editmode && <CardEdit card={card} onUndo={() => handleEditCard(card.id)} />}
         </div>
-        <DeleteButton onConfirm={()=> handleDeleteCard(card.id)}/>
-        <EditButton onConfirm={()=>handleEditCard(card.id)}/>
+        {!editmode && 
+            <div className="flex justify-between gap-2">
+                <DeleteButton onConfirm={()=> handleDeleteCard(card.id)}/>
+                <EditButton onConfirm={()=>handleEditCard(card.id)}/>
+            </div>    
+        }
         </>
     )
 }
