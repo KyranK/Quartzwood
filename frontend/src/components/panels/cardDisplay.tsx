@@ -1,21 +1,21 @@
 import type Card from "../../interfaces/card"
-import LoadingSpinner from "../LoadingSpinner"
 import DeleteButton from "../buttons/DeleteButton"
 import EditButton from "../buttons/EditButton"
-import { func, string } from "prop-types"
 import CardDetails from "./cardDetails"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import CardEdit from "./cardEdit"
 import client from '../../api/client'
 
 interface CardDisplayProps {
     card: Card
+    onUpdate?: (updated: Card) => void
 }
 
-function CardDisplay({ card }: CardDisplayProps) {
+function CardDisplay({ card, onUpdate }: CardDisplayProps) {
 
     //
     const [editmode, seteditmode] = useState(false)
+    const [currentCard, setCurrentCard] = useState<Card>(card)
 
     function handleDeleteCard(c_id: number | null){
     console.log("Request to delete card: " + ({c_id}) )
@@ -25,8 +25,8 @@ function CardDisplay({ card }: CardDisplayProps) {
         seteditmode(!editmode)
     }
     function handleSave(updated: Card) {   
-    const setChanged = updated.set_code !== card.set_code || updated.set_number !== card.set_number
-    console.log('setChanged:', setChanged, updated.set_code, card.set_number)
+    const setChanged = updated.set_code !== currentCard.set_code || updated.set_number !== currentCard.set_number
+    console.log('setChanged:', setChanged, updated.set_code, updated.set_number)
 
     client.put(`/card/${updated.id}`, {
         condition: updated.condition,
@@ -39,12 +39,24 @@ function CardDisplay({ card }: CardDisplayProps) {
         set_number: updated.set_number,
     })
     .then(() => {
+        console.log('PUT success')
         if (setChanged) {
-            // re-fetch Scryfall data via backend
             client.post(`/card/${updated.id}/refresh-scryfall`)
-                .then(() => seteditmode(false))
-                .catch(err => console.error(err))
+                .then(() => {
+                    console.log('refresh-scryfall success')
+                    client.get<Card>(`/card/${updated.id}`)
+                        .then(res => {
+                            console.log('re-fetch success', res.data)
+                            setCurrentCard(res.data)
+                            onUpdate?.(res.data)
+                            seteditmode(false)
+                        })
+                })
         } else {
+            console.log('no set change, updating locally')
+            console.log('updated:', updated)
+            setCurrentCard(updated)
+            onUpdate?.(updated)
             seteditmode(false)
         }
     })
@@ -52,11 +64,15 @@ function CardDisplay({ card }: CardDisplayProps) {
 }
     //
 
+    useEffect(() => {
+        setCurrentCard(card)
+    }, [card])
+
     return (
         <>
         <div className="p-2">
-            {!editmode && <CardDetails card={card} />}
-            {editmode && <CardEdit card={card} onUndo={() => handleEditCard(card.id)} onSave={handleSave} />}
+            {!editmode && <CardDetails card={currentCard} />}
+            {editmode && <CardEdit card={currentCard} onUndo={() => handleEditCard(currentCard.id)} onSave={handleSave} />}
         </div>
         {!editmode && 
             <div className="flex justify-between gap-2">

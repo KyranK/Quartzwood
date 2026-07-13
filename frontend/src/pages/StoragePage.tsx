@@ -32,6 +32,10 @@ export default function StoragePage() {
     const [panelCard, setPanelCard] = useState<Card | null>(null)
     const [panelInstances, setPanelInstances] = useState<Card[] | null>(null)
     const [showPanel, setShowPanel] = useState(false)
+    const refreshCards = () => {
+        client.get<Card[]>(`/storage/${name}/cards`)
+            .then(res => setCards(res.data))
+    }
 
 
     const handleCardClick = (c: Card) => {
@@ -63,21 +67,20 @@ export default function StoragePage() {
 
     if (loading) return <LoadingSpinner />
 
-    let panelContent;
 
-    if (panelCard) {
-        panelContent = <CardDisplay card={panelCard} />;
-    } else if (panelInstances !== null && panelInstances[0]) {
-        panelContent = <CardSelection cards={panelInstances} onSelectCard={handleCardClick} />;
-    } else {
-        panelContent = <LoadingSpinner />;}
 
     return (
         <div className="p-8">
             <Panel
                 showPanel={showPanel}
                 onClose={() => setShowPanel(false)}
-                context={panelContent}
+                context={
+                    panelCard 
+                        ? <CardDisplay card={panelCard}  onUpdate={(updated) => { setPanelCard(updated); refreshCards(); }} />
+                        : panelInstances !== null && panelInstances[0]
+                            ? <CardSelection cards={panelInstances} onSelectCard={handleCardClick} />
+                            : <LoadingSpinner />
+                }
             />
             <button
                 onClick={() => navigate(-1)}
