@@ -2,6 +2,8 @@
 import { useState } from "react"
 import Card from "../interfaces/card"
 import client from "../api/client"
+import * as Enums from "../interfaces/enums"
+import { object } from "prop-types"
 
 // Interface
 interface CardAddProps {
@@ -14,15 +16,25 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
     const [cId, setCId] = useState("")
 
+    // Enum Keys
+    const conditionKeys = Object.keys(Enums.Condition) as Array<keyof typeof Enums.Condition>
+    const foilKeys = Object.keys(Enums.FoilType) as Array<keyof typeof Enums.FoilType>
+    const stampKeys = Object.keys(Enums.StampType) as Array<keyof typeof Enums.StampType>
+
     // advanced fields with safe defaults
-    const [condition, setCondition] = useState("NM")
-    const [foilType, setFoilType] = useState("none")
-    const [stampType, setStampType] = useState("none")
+    const [condition, setCondition] = useState(Enums.Condition.near_mint as string)
+    const [foilType, setFoilType] = useState(Enums.FoilType.none as string)
+    const [stampType, setStampType] = useState(Enums.StampType.none as string)
     const [language, setLanguage] = useState("en")
     const [notes, setNotes] = useState("")
     const [acquiredDate, setAcquiredDate] = useState("")
     const [purchasePrice, setPurchasePrice] = useState("")
     const [quantity, setQuantity] = useState<number>(1)
+
+    // Form Display Controlo conts
+    const isSimpleFoil = foilType == Enums.FoilType.none || foilType == Enums.FoilType.traditional
+    const [advancedFoil, setAdvancedFoil] = useState(!isSimpleFoil)
+
 
     // Internal functions
     function OnSubmit(event: any){
@@ -44,10 +56,10 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
         const payload: any = {
             set_code,
             set_number,
-            condition: condition || 'NM',
+            condition: condition || Enums.Condition.near_mint,
             storage_name: storage,
-            foil_type: foilType || 'none',
-            stamp_type: stampType || 'none',
+            foil_type: foilType || Enums.FoilType.none,
+            stamp_type: stampType || Enums.StampType.none,
             language: language || 'en',
             notes: notes || undefined,
             quantity: quantity || 1,
@@ -115,43 +127,65 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
                                 <label className="grid gap-1 text-sm text-stone-700">
                                     <span className="font-semibold text-stone-600">Condition</span>
                                     <select value={condition} onChange={(e)=>setCondition(e.target.value)} className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100">
-                                        <option value="NM">NM</option>
-                                        <option value="LP">LP</option>
-                                        <option value="MP">MP</option>
-                                        <option value="HP">HP</option>
-                                        <option value="DMG">DMG</option>                                    </select>
+                                        {conditionKeys.map((key) => (
+                                            <option key={key} value={key}>
+                                                {Enums.Condition[key] ?? key}
+                                            </option>
+
+                                        ))}
+                                 </select>
                                 </label>
 
                                 <label className="grid gap-1 text-sm text-stone-700">
                                     <span className="font-semibold text-stone-600">Foil</span>
-                                    <select value={foilType} onChange={(e)=>setFoilType(e.target.value)} className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100">
-                                       <option value="none">None</option>
-                                                <option value="traditional">Traditional</option>
-                                                <option value="pre_modern">Pre-Modern</option>
-                                                <option value="from_the_vault">From the Vault</option>
-                                                <option value="etched">Etched</option>
-                                                <option value="textured">Textured</option>
-                                                <option value="fracture">Fracture</option>
-                                                <option value="double_rainbow">Double Rainbow</option>
-                                                <option value="confetti">Confetti</option>
-                                                <option value="galaxy">Galaxy</option>
-                                                <option value="gilded">Gilded</option>
-                                                <option value="halo">Halo</option>
-                                                <option value="invisible_ink">Invisible Ink</option>
-                                                <option value="neon_ink">Neon Ink</option>
-                                                <option value="oil_slick">Oil Slick</option>
-                                                <option value="silverscreen">Silverscreen</option>
-                                                <option value="step_and_compleat">Step and Compleat</option>
-                                                <option value="surge">Surge</option>
-                                    </select>
+                                    {!advancedFoil && 
+                                    <div className="flex justify-between m-2">
+                                        <input
+                                            type="checkbox"
+                                            className="display:block"
+                                            checked={foilType == Enums.FoilType.traditional}
+                                            onChange={e => setFoilType(
+                                                e.target.checked ? Enums.FoilType.traditional : Enums.FoilType.none
+                                            )}
+                                        />  
+                                        <button
+                                            type="button"
+                                            onClick={() => setAdvancedFoil(true)}
+                                            className="display:block text-s text-orange-400 font-bold hover:text-stone-600 underline"
+                                        >
+                                            advanced
+                                        </button> 
+                                    </div>                                                   
+                                    }
+                                    {advancedFoil &&
+                                    <>
+                                        <select value={foilType} onChange={(e)=>setFoilType(e.target.value)} className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100">
+                                            {foilKeys.map((key) => (
+                                                <option key={key} value={key}>
+                                                    {Enums.FoilType[key] ?? key}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            type="button"
+                                            onClick={() => setAdvancedFoil(false)}
+                                            className="text-s text-orange-400 font-bold hover:text-stone-600 underline"
+                                        >
+                                            simple
+                                        </button> 
+                                    </>
+                                    }
+
                                 </label>
 
                                 <label className="grid gap-1 text-sm text-stone-700">
                                     <span className="font-semibold text-stone-600">Stamp</span>
                                     <select value={stampType} onChange={(e)=>setCondition(e.target.value)} className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100">
-                                       <option value="none">None</option>
-                                        <option value="promo">Promo</option>
-                                        <option value="prerelease">Prerelease</option>
+                                       {stampKeys.map((key) => (
+                                        <option key={key} value={key}>
+                                            {Enums.StampType[key] ?? key}
+                                        </option>
+                                       ))}
                                     </select>
                                 </label>
 
@@ -174,8 +208,6 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
                                     <span className="font-semibold text-stone-600">Purchase Price</span>
                                     <input type="number" step="0.01" min="0" value={purchasePrice} onChange={(e)=>setPurchasePrice(e.target.value)} className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100" />
                                 </label>
-
-
                             </div>
                         </div>
                     )}
