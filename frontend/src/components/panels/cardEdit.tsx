@@ -1,5 +1,6 @@
 import type Card from "../../interfaces/card"
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
+import * as Enums from "../../interfaces/enums"
 
 interface CardEditProps {
     card: Card
@@ -20,6 +21,9 @@ interface CardFormState {
 }
 
 function CardEdit({ card, onUndo, onSave}: CardEditProps) {
+    // Conts
+
+    // Form RAM
     const [formState, setFormState] = useState<CardFormState>({
         name: card.name,
         set_code: card.set_code,
@@ -32,9 +36,16 @@ function CardEdit({ card, onUndo, onSave}: CardEditProps) {
         purchase_price: card.purchase_price?.toString() ?? "",
     })
 
+    // Form Display Controls
     const isSimpleFoil = formState.foil_type === "none" || formState.foil_type === "traditional"
     const [advancedFoil, setAdvancedFoil] = useState(!isSimpleFoil)
 
+    // Enum Keys
+    const conditionKeys = Object.keys(Enums.Condition) as Array<keyof typeof Enums.Condition>
+    const foilKeys = Object.keys(Enums.FoilType) as Array<keyof typeof Enums.FoilType>
+    const stampKeys = Object.keys(Enums.StampType) as Array<keyof typeof Enums.StampType>
+
+    // Helper Funcs
     function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
         const { name, value } = event.target
         setFormState(prev => ({ ...prev, [name]: value }))
@@ -112,11 +123,12 @@ function CardEdit({ card, onUndo, onSave}: CardEditProps) {
                                         onChange={e => setFormState(prev => ({...prev, condition: e.target.value}))}
                                         className="w-full rounded border border-amber-200 bg-white px-3 py-2 text-sm text-stone-700"
                                     >
-                                        <option value="NM">NM</option>
-                                        <option value="LP">LP</option>
-                                        <option value="MP">MP</option>
-                                        <option value="HP">HP</option>
-                                        <option value="DMG">DMG</option>
+                                        {conditionKeys.map((key) => (
+                                            <option key={key} value={key}>
+                                                {Enums.Condition[key] ?? key}
+                                            </option>
+
+                                        ))}
                                     </select>
                                 </td>
                             </tr>
@@ -127,10 +139,10 @@ function CardEdit({ card, onUndo, onSave}: CardEditProps) {
                                         <div className="flex items-center gap-3">
                                             <input
                                                 type="checkbox"
-                                                checked={formState.foil_type === "traditional"}
+                                                checked={formState.foil_type == Enums.FoilType.traditional}
                                                 onChange={e => setFormState(prev => ({
                                                     ...prev,
-                                                    foil_type: e.target.checked ? "traditional" : "none"
+                                                    foil_type: e.target.checked ? Enums.FoilType.traditional : Enums.FoilType.none
                                                 }))}
                                             />
                                             <button
@@ -150,24 +162,11 @@ function CardEdit({ card, onUndo, onSave}: CardEditProps) {
                                                 onChange={handleInputChange}
                                                 className="w-full rounded border border-amber-200 bg-white px-3 py-2 text-sm text-stone-700"
                                             >
-                                                <option value="none">None</option>
-                                                <option value="traditional">Traditional</option>
-                                                <option value="pre_modern">Pre-Modern</option>
-                                                <option value="from_the_vault">From the Vault</option>
-                                                <option value="etched">Etched</option>
-                                                <option value="textured">Textured</option>
-                                                <option value="fracture">Fracture</option>
-                                                <option value="double_rainbow">Double Rainbow</option>
-                                                <option value="confetti">Confetti</option>
-                                                <option value="galaxy">Galaxy</option>
-                                                <option value="gilded">Gilded</option>
-                                                <option value="halo">Halo</option>
-                                                <option value="invisible_ink">Invisible Ink</option>
-                                                <option value="neon_ink">Neon Ink</option>
-                                                <option value="oil_slick">Oil Slick</option>
-                                                <option value="silverscreen">Silverscreen</option>
-                                                <option value="step_and_compleat">Step and Compleat</option>
-                                                <option value="surge">Surge</option>
+                                            {foilKeys.map((key) => (
+                                                <option key={key} value={key}>
+                                                    {Enums.FoilType[key] ?? key}
+                                                </option>
+                                            ))}
                                             </select>
                                             <button
                                                 type="button"
@@ -189,9 +188,11 @@ function CardEdit({ card, onUndo, onSave}: CardEditProps) {
                                         onChange={e => setFormState(prev => ({...prev, stamp_type: e.target.value}))}
                                         className="w-full rounded border border-amber-200 bg-white px-3 py-2 text-sm text-stone-700"
                                     >
-                                        <option value="none">None</option>
-                                        <option value="promo">Promo</option>
-                                        <option value="prerelease">Prerelease</option>
+                                       {stampKeys.map((key) => (
+                                        <option key={key} value={key}>
+                                            {Enums.StampType[key] ?? key}
+                                        </option>
+                                       ))}
                                     </select>
                                 </td>
                             </tr>
