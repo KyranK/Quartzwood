@@ -37,6 +37,19 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
 
 
     // Internal functions
+    function setFormDefualt(){
+        // Helpful not to reset incase going through 2nd-hand vs new booster
+        //setCondition(Enums.Condition.near_mint) 
+        setFoilType(Enums.FoilType.none)
+        setLanguage("en") // TODO: Enum Lang
+        setNotes("")
+        // Hepful to not reset acquiredDate -> ussally go throug recent cards @ once
+        //setAcquiredDate("")
+        setPurchasePrice("")
+        setQuantity(1)
+        setCId("")
+    }
+
     function OnSubmit(event: any){
         if(event?.preventDefault) event.preventDefault()
 
@@ -74,6 +87,7 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
             setShowAdvancedOptions(false)
             // optionally reset inputs
             // setCId('')
+            setFormDefualt()
             onUpdate?.()
         })
         .catch(err => console.error(err))

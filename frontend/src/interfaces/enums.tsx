@@ -40,6 +40,8 @@ enum EntityType{
     shop = "shop",
 }
 
+//TODO: Add language enum
+
 export {
     Condition,
     FoilType,
