@@ -48,15 +48,18 @@ def index(request: Request):
         )
 #endregion
 
-#region JSON API
-    #region Entites
-@app.get("/api/entities")
+
+#region Entites
+    #region Read
+@app.get("/api/entities") # All Entites
 def api_get_all_entities():
     with get_session() as session:
         entities = get_all_entities(session)
         return [{"id": e.id, "name": e.name, "type": e.type.value, "location": e.location} for e in entities]
     #endregion
-    #region Collections
+#endregion
+#region Collections
+    #region Read
 @app.get("/api/collections/") # All Collections
 def api_get_all_collections():
     with get_session() as session:
@@ -76,21 +79,23 @@ def api_get_collections_by_entity(entity_id: int):
         collections = get_collections_by_entity_id(session, entity_id)
         return [{"id": c.id, "name": c.name, "description": c.description, "location": c.location, "owner_id": c.entity_id,} for c in collections]
     #endregion
-    #region Storages
+#endregion
+#region Storages
+    #region Read
 @app.get("/api/storage") # All storages
 def api_get_all_storage():
     with get_session() as session:
         storages = get_all_storage(session)
         return[{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
     
-@app.get("/api/storage/{storage_name}") # All storages
+@app.get("/api/storage/{storage_name}") # Storage by name
 def api_get_storage_by_name(storage_name: str):
     with get_session() as session:
         storages = get_storage_by_name(session, storage_name)
         if storages:
             return[{"id": storages.id, "name": storages.name, "description": storages.description, "collection_id": storages.collection_id}]    
         
-@app.get("/api/storage/by-collection/{collection_name}")
+@app.get("/api/storage/by-collection/{collection_name}") # Storage by Collection
 def api_get_storage_by_collection(collection_name: str):
     with get_session() as session:
         collection = get_collection_by_name(session, collection_name)
@@ -98,85 +103,13 @@ def api_get_storage_by_collection(collection_name: str):
             return []
         storages = get_storage_by_collection_id(session, collection.id)
         return [{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
-    
-@app.get("/api/storage/{storage_name}/info")
-def api_get_storage_info(storage_name: str):
-    with get_session() as session:
-        storage = get_storage_by_name(session, storage_name)
-        if storage is None:
-            return {"name": storage_name, "collection": None}
-        collection = None
-        if storage.collection_id:
-            col = get_collection_by_id(session, storage.collection_id)
-            collection = col.name if col else None
-        return {"name": storage_name, "collection": collection}
     #endregion
-    #region Cards
-@app.get("/api/cards")
-def api_get_all_cards():
-    with get_session() as session:
-        return get_all_cards(session)
-
-@app.get("/api/storage/{storage_name}/cards")
-def api_get_cards_by_storage(storage_name: str):
-    with get_session() as session:
-        storage = get_storage_by_name(session, storage_name)
-        if storage is None:
-            return []
-        return get_grouped_cards_by_storage(session, storage.id)
-
-@app.get("/api/card/{card_id}")
-def api_get_card(card_id: int):
-    with get_session() as session:
-        card = get_card_by_id(session, card_id)
-        if card is None:
-            return JSONResponse(status_code=404, content={"detail": "Card not found"})
-        return {
-            "id": card.id,
-            "name": card.name,
-            "set_code": card.set_code,
-            "set_number": card.set_number,
-            "scryfall_id": card.scryfall_id,
-            "condition": card.condition.value,
-            "foil_type": card.foil_type.value,
-            "stamp_type": card.stamp_type.value,
-            "language": card.language,
-            "notes": card.notes,
-            "storage_id": card.storage_id,
-            "acquired_date": str(card.acquired_date) if card.acquired_date else None,
-            "purchase_price": card.purchase_price,
-        }
-    
-@app.get("/api/storage/{storage_name}/cards/{set_code}/{set_number}")
-def api_get_collated_storage_cards(
-    storage_name: str,
-    set_code: str,
-    set_number: int
-):
-    with get_session() as session:
-        storage = get_storage_by_name(session, storage_name)
-        if storage is None:
-            return []
-        cards = get_cards_filtered(
-            session, set_number, set_code,
-            storage_name=storage_name
-        )
-        return cards
-    
-@app.put("/api/card/{card_id}")
-def api_update_card(card_id: int, data: dict = Body(...)):
-    with get_session() as session:
-        card = get_card_by_id(session, card_id)
-        if card is None:
-            return JSONResponse(status_code=404, content={"detail": "Not found"})
-        for key, value in data.items():
-            if hasattr(card, key):
-                setattr(card, key, value)
-        session.add(card)
-        session.commit()
-        return {"success": True}
-    
-@app.post("/api/add-cards")
+#endregion
+#region Cards
+    #region Add
+# FIX:
+# Need to control where card is added
+@app.post("/api/add-cards") # Add Card
 def api_add_card(data: dict = Body(...)):
     with get_session() as session:
         try:
@@ -198,8 +131,76 @@ def api_add_card(data: dict = Body(...)):
         except ValueError as e:
             return JSONResponse(status_code=400, content={"detail": str(e)})
     #endregion
-    #region Scryfall
-@app.post("/api/card/{card_id}/refresh-scryfall")
+
+    #region Read
+@app.get("/api/cards") # All cards in DB
+def api_get_all_cards():
+    with get_session() as session:
+        return get_all_cards(session)
+
+@app.get("/api/storage/{storage_name}/cards") # Cards by Storage
+def api_get_cards_by_storage(storage_name: str):
+    with get_session() as session:
+        storage = get_storage_by_name(session, storage_name)
+        if storage is None:
+            return []
+        return get_grouped_cards_by_storage(session, storage.id)
+
+@app.get("/api/card/{card_id}") # Card by id
+def api_get_card(card_id: int):
+    with get_session() as session:
+        card = get_card_by_id(session, card_id)
+        if card is None:
+            return JSONResponse(status_code=404, content={"detail": "Card not found"})
+        return {
+            "id": card.id,
+            "name": card.name,
+            "set_code": card.set_code,
+            "set_number": card.set_number,
+            "scryfall_id": card.scryfall_id,
+            "condition": card.condition.value,
+            "foil_type": card.foil_type.value,
+            "stamp_type": card.stamp_type.value,
+            "language": card.language,
+            "notes": card.notes,
+            "storage_id": card.storage_id,
+            "acquired_date": str(card.acquired_date) if card.acquired_date else None,
+            "purchase_price": card.purchase_price,
+        }
+    
+@app.get("/api/storage/{storage_name}/cards/{set_code}/{set_number}") # Card by Storage + setID
+def api_get_collated_storage_cards(
+    storage_name: str,
+    set_code: str,
+    set_number: int
+):
+    with get_session() as session:
+        storage = get_storage_by_name(session, storage_name)
+        if storage is None:
+            return []
+        cards = get_cards_filtered(
+            session, set_number, set_code,
+            storage_name=storage_name
+        )
+        return cards
+    
+@app.put("/api/card/{card_id}") #Card by set ID
+def api_update_card(card_id: int, data: dict = Body(...)):
+    with get_session() as session:
+        card = get_card_by_id(session, card_id)
+        if card is None:
+            return JSONResponse(status_code=404, content={"detail": "Not found"})
+        for key, value in data.items():
+            if hasattr(card, key):
+                setattr(card, key, value)
+        session.add(card)
+        session.commit()
+        return {"success": True}
+    #endregion
+
+#endregion
+#region Scryfall
+@app.post("/api/card/{card_id}/refresh-scryfall") # Update Scryfall ID/Img
 def api_refresh_scryfall(card_id: int):
     with get_session() as session:
         card = session.get(CardInstance, card_id)
@@ -218,5 +219,17 @@ def api_refresh_scryfall(card_id: int):
         session.add(card)
         session.commit()
         return {"success": True}
-    #endregion
+#endregion
+#region Misc
+@app.get("/api/storage/{storage_name}/info") # Path by Storage
+def api_get_storage_info(storage_name: str):
+    with get_session() as session:
+        storage = get_storage_by_name(session, storage_name)
+        if storage is None:
+            return {"name": storage_name, "collection": None}
+        collection = None
+        if storage.collection_id:
+            col = get_collection_by_id(session, storage.collection_id)
+            collection = col.name if col else None
+        return {"name": storage_name, "collection": collection}
 #endregion
