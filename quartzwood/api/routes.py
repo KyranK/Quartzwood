@@ -176,7 +176,7 @@ def api_update_card(card_id: int, data: dict = Body(...)):
         session.commit()
         return {"success": True}
     
-@app.post("/api/cards")
+@app.post("/api/add-cards")
 def api_add_card(data: dict = Body(...)):
     with get_session() as session:
         try:
