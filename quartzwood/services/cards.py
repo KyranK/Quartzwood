@@ -223,6 +223,16 @@ def delete_cards(
 
     return cards
 
+def delete_card_by_id(
+        session: Session,
+        card_id: int
+    ):
+    card = get_card_by_id(session, card_id)
+    session.delete(card)
+
+    session.commit()
+    return card
+
     #endregion
 #endregion
 

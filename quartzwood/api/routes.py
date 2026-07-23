@@ -10,7 +10,8 @@ from quartzwood.services.cards import(
     get_all_cards,
     get_card_by_id,
     get_cards_filtered,
-    add_card
+    add_card,
+    delete_card_by_id,
 )
 from quartzwood.services.collection import (
     get_all_collections,
@@ -184,7 +185,9 @@ def api_get_collated_storage_cards(
         )
         return cards
     
-@app.put("/api/card/{card_id}") #Card by set ID
+    #endregion
+    #region Update
+@app.put("/api/card/{card_id}") # Update Card by C-ID
 def api_update_card(card_id: int, data: dict = Body(...)):
     with get_session() as session:
         card = get_card_by_id(session, card_id)
@@ -197,6 +200,17 @@ def api_update_card(card_id: int, data: dict = Body(...)):
         session.commit()
         return {"success": True}
     #endregion
+    #region Delete
+@app.delete("/api/card/{card_id}") # Delete Card by C-ID
+def api_delete_card(card_id: int):
+    with get_session() as session:
+        # Check if card id is valid
+        card = get_card_by_id(session, card_id)
+        if card is None:
+            return JSONResponse(status_code=404, content={"detail": "Not found"})
+        # Delete
+        return delete_card_by_id(session, card_id)
+    #endregiion
 
 #endregion
 #region Scryfall

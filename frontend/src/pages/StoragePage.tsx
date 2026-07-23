@@ -78,7 +78,7 @@ export default function StoragePage() {
                 onClose={() => setShowPanel(false)}
                 context={
                     panelCard 
-                        ? <CardDisplay card={panelCard}  onUpdate={(updated) => { setPanelCard(updated); refreshCards(); }} />
+                        ? <CardDisplay card={panelCard}  onUpdate={(updated) => { setPanelCard(updated); refreshCards();}} onDelete={() => {refreshCards();} } />
                         : panelInstances !== null && panelInstances[0]
                             ? <CardSelection cards={panelInstances} onSelectCard={handleCardClick} />
                             : <LoadingSpinner />

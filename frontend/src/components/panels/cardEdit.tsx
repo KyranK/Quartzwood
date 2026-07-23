@@ -1,6 +1,7 @@
 import type Card from "../../interfaces/card"
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import * as Enums from "../../interfaces/enums"
+import * as APICards from "../../api/cards"
 
 interface CardEditProps {
     card: Card

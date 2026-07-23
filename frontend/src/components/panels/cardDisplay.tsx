@@ -5,20 +5,28 @@ import CardDetails from "./cardDetails"
 import { useState, useEffect } from "react"
 import CardEdit from "./cardEdit"
 import client from '../../api/client'
+import * as apiCards from "../../api/cards"
 
 interface CardDisplayProps {
     card: Card
     onUpdate?: (updated: Card) => void
+    onDelete?: () => void
 }
 
-function CardDisplay({ card, onUpdate }: CardDisplayProps) {
+function CardDisplay({ card, onUpdate, onDelete }: CardDisplayProps) {
 
     //
     const [editmode, seteditmode] = useState(false)
     const [currentCard, setCurrentCard] = useState<Card>(card)
 
     function handleDeleteCard(c_id: number | null){
-    console.log("Request to delete card: " + ({c_id}) )
+        console.log("Request to delete card: " + ({c_id}) )
+        if (c_id != null) {
+            apiCards.deleteCard(c_id)
+            .then(() =>
+                {onDelete?.()
+                })
+        }
     }
     function handleEditCard(c_id: number | null){
         console.log("Request to Edit card: " + ({c_id}) )

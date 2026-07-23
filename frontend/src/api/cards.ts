@@ -18,7 +18,9 @@ async function updateCard(id: number, data: Partial<Card>): Promise<void> {
 }
 //endregion
 //region DELETE
-
+async function deleteCard(id: number): Promise<void> {
+    await client.delete(`/card/${id}`)
+}
 //endregion
 
 
@@ -26,4 +28,5 @@ export{
     addCard,
     cardByStorage,
     updateCard,
+    deleteCard,
 }
