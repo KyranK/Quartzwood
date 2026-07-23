@@ -7,8 +7,8 @@ async function addCard(data: object): Promise<void> {
 }
 //endregion
 //region GET
-async function cardByStorage(storage_name: string): Promise<Card[]> {
-    const res = await client.get(`/api/storage/${storage_name}/cards`)
+async function cardsByStorage(storage_id: string): Promise<Card[]> {
+    const res = await client.get(`/api/storage/${storage_id}/cards`)
     return res.data
 }
 //endregion
@@ -26,7 +26,7 @@ async function deleteCard(id: number): Promise<void> {
 
 export{
     addCard,
-    cardByStorage,
+    cardsByStorage,
     updateCard,
     deleteCard,
 }

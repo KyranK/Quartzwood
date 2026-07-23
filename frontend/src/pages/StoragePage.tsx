@@ -26,7 +26,8 @@ interface Card {
 }
 
 export default function StoragePage() {
-    const { name } = useParams<{ name: string }>()
+    const { storage_id } = useParams<{ storage_id: string }>()
+    const [storageName, setStorageName] = useState<string>('')
     const [cards, setCards] = useState<Card[]>([])
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
@@ -35,7 +36,7 @@ export default function StoragePage() {
     const [showPanel, setShowPanel] = useState(false)
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
     const refreshCards = () => {
-        client.get<Card[]>(`/storage/${name}/cards`)
+        client.get<Card[]>(`/storage/${Number(storage_id)}/cards`)
             .then(res => setCards(res.data))
     }
 
@@ -53,7 +54,7 @@ export default function StoragePage() {
                 })
         } else {
             // This is a grouped card, so show the matching instances.
-            client.get<Card[]>(`/storage/${name}/cards/${c.set_code}/${c.set_number}`)
+            client.get<Card[]>(`/storage/${Number(storage_id)}/cards/${c.set_code}/${c.set_number}`)
                 .then(res => {
                     setPanelInstances(res.data)
                 })
@@ -62,10 +63,12 @@ export default function StoragePage() {
     }
 
     useEffect(() => {
-        client.get<Card[]>(`/storage/${name}/cards`)
+        client.get<Storage>(`/storage/${storage_id}`)
+        .then(res => {setStorageName((res.data.name))})
+        client.get<Card[]>(`/storage/${storage_id}/cards`)
             .then(res => setCards(res.data))
             .finally(() => setLoading(false))
-    }, [name])
+    }, [storage_id])
 
     if (loading) return <LoadingSpinner />
 
@@ -92,11 +95,11 @@ export default function StoragePage() {
             </button>
             <div className="mb-6 relative">
                 <div className="max-w-2xl">
-                    <h1 className="text-2xl font-bold text-stone-900">{name}</h1>
+                    <h1 className="text-2xl font-bold text-stone-900">{storageName}</h1>
                 </div>
                 {/* AddCard */}
-                {name ? 
-                    <CardAdd onUpdate={refreshCards} storage={name}/>
+                {storage_id ? 
+                    <CardAdd onUpdate={refreshCards} storage={storage_id}/>
                 :   <CardAdd onUpdate={refreshCards}/>
                 }
             </div>

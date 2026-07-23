@@ -34,7 +34,7 @@ if (loading) return <LoadingSpinner />
         {storages.map(s => (
           <div
             key={s.id}
-            onClick={() => navigate(`/storage/${s.name}`)}
+            onClick={() => navigate(`/storage/${s.id}`)}
             className="p-4 border rounded cursor-pointer hover:bg-gray-100"
           >
             <h2 className="text-lg font-semibold">{s.name}</h2>

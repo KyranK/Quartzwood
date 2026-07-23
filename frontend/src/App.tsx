@@ -11,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/collection/:name" element={<CollectionPage />} />
-        <Route path="/storage/:name" element={<StoragePage />} />
+        <Route path="/storage/:storage_id" element={<StoragePage />} />
       </Routes>
     </>
   )

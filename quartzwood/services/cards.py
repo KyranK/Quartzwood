@@ -68,56 +68,36 @@ def add_card(
 
     #endregion
     #region Read
-def get_all_cards(session: Session) -> list[CardInstance]:
+
+    # All cards
+def get_all_cards(session: Session) -> list[CardInstance]: 
     return session.exec(select(CardInstance)).all()
 
+def get_all_cards_grouped(session) -> list[dict]:
+    cards = get_all_cards(session)
+    return group_cards(cards)
 
-def get_cards_by_storage(session: Session, storage_id: int) -> list[CardInstance]:
+    # Cards by ID
+def get_card_by_id(session: Session, card_id: int) -> CardInstance | None:
+    return session.get(CardInstance, card_id)
+
+    # Cards by Storage
+def get_cards_by_storage_id(session: Session, storage_id: int) -> list[CardInstance]:
     return session.exec(select(CardInstance).where(CardInstance.storage_id == storage_id)).all()
 
 
 def get_grouped_cards_by_storage(session: Session, storage_id: int) -> list[dict]:
-    cards = get_cards_by_storage(session, storage_id)
-    groups = {}
-    for card in cards:
-        key = (card.name, card.set_code, card.set_number, card.condition, card.foil_type)
-        if key in groups:
-            groups[key]["count"] += 1
-            groups[key]["id"] = None  # multiple instances, no single id
-        else:
-            groups[key] = {
-                "scryfall_id": card.scryfall_id, 
-                "name": card.name,
-                "set_code": card.set_code,
-                "set_number": card.set_number,
-                "condition": card.condition.value,
-                "foil_type": card.foil_type.value,
-                "count": 1,
-                "id": card.id,
-            }
-    return list(groups.values())
+    cards = get_cards_by_storage_id(session, storage_id)
+    return group_cards(cards)
 
 
-def get_cards_grouped(session: Session) -> list[dict]:
-    cards = session.exec(select(CardInstance)).all()
+    # Cards by Collection
+
     
-    groups = {}
-    for card in cards:
-        key = (card.name, card.set_code, card.set_number, card.condition, card.foil_type)
-        if key in groups:
-            groups[key]["count"] += 1
-        else:
-            groups[key] = {
-                "name": card.name,
-                "set_code": card.set_code,
-                "set_number": card.set_number,
-                "condition": card.condition.value,
-                "foil_type": card.foil_type.value,
-                "count": 1
-            }
-    return list(groups.values())
+    # Cards by Entity
 
 
+    # Cards by filter
 def get_cards_filtered(
     session: Session,
     set_number: str,
@@ -145,10 +125,47 @@ def get_cards_filtered(
     return session.exec(query).all()
 
 
-def get_card_by_id(session: Session, card_id: int) -> CardInstance | None:
-    return session.get(CardInstance, card_id)
+
+
     #endregion
     #region Update
+
+    # Update by ID
+def update_card_by_id(
+    session: Session,
+    c_id: int,
+    #updates
+    n_set_number: str = "",
+    n_set_code: str = "",
+    n_condition: Condition = None,
+    n_foil: FoilType = None,
+    n_storage_id: int = None,
+    n_notes: str = ""
+) -> CardInstance:
+    
+    card = get_card_by_id(session, c_id)
+    if card == None:
+        raise ValueError(f"Card with id:'{c_id}' not found")
+    
+    if n_set_number:
+        card.set_number = n_set_number
+    if n_set_code:
+        card.set_code = n_set_code
+    if n_condition:
+        card.condition = n_condition
+    if n_foil:
+        card.foil_type = n_foil
+    if n_storage_id:
+        card.storage_id = n_storage_id
+    if n_notes:
+        card.notes = n_notes
+
+    session.commit()
+    session.refresh(card)
+
+    return card
+    
+
 def update_cards(
     session: Session,
     set_number: str, 
@@ -223,6 +240,7 @@ def delete_cards(
 
     return cards
 
+    # Delete by id
 def delete_card_by_id(
         session: Session,
         card_id: int
@@ -235,5 +253,26 @@ def delete_card_by_id(
 
     #endregion
 #endregion
+#region Misc
+def group_cards(cards: list) -> list[dict]:
 
+    groups = {}
+    for card in cards:
+        key = (card.name, card.set_code, card.set_number, card.condition, card.foil_type)
+        if key in groups:
+            groups[key]["count"] += 1
+            groups[key]["id"] = None  # multiple instances, no single id
+        else:
+            groups[key] = {
+                "scryfall_id": card.scryfall_id, 
+                "name": card.name,
+                "set_code": card.set_code,
+                "set_number": card.set_number,
+                "condition": card.condition.value,
+                "foil_type": card.foil_type.value,
+                "count": 1,
+                "id": card.id,
+            }
+    return list(groups.values())
+#endregion
 #EOF

@@ -6,7 +6,7 @@ from quartzwood.models.storage import Storage
 
 
 from quartzwood.services.collection import get_collection_id_by_name
-from quartzwood.services.cards import get_cards_by_storage
+from quartzwood.services.cards import get_cards_by_storage_id
 #endregion
 
 #region Storage
@@ -28,6 +28,10 @@ def create_storage(session: Session, name: str, collection_name: str = None, des
     #region Read
 def get_all_storage(session: Session) -> list[Storage]:
     return session.exec(select(Storage)).all()
+
+
+def get_storage_by_id(session: Session, storage_id: int) -> Storage:
+    return session.get(Storage, storage_id)
 
 
 def get_storage_id_by_name(session: Session, storage_name: str) -> int | None:
@@ -95,7 +99,7 @@ def delete_storage(
         raise ValueError(f"Storage '{storage_name}' not found")
     
     # get cards from storage
-    cards = get_cards_by_storage(session, storage_id)
+    cards = get_cards_by_storage_id(session, storage_id)
     if cards:
     # Relocate cards
         # relocate

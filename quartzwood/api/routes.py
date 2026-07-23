@@ -5,13 +5,16 @@ from quartzwood.api.app import app, templates
 from quartzwood.db import get_session
 from quartzwood.models.card import CardInstance
 from quartzwood.services.cards import(
-    get_cards_grouped,
+    get_all_cards_grouped,
     get_grouped_cards_by_storage,
     get_all_cards,
     get_card_by_id,
     get_cards_filtered,
     add_card,
     delete_card_by_id,
+    get_cards_by_storage_id, 
+    update_card_by_id,
+    get_grouped_cards_by_storage
 )
 from quartzwood.services.collection import (
     get_all_collections,
@@ -22,7 +25,8 @@ from quartzwood.services.collection import (
 from quartzwood.services.storage import(
     get_all_storage,
     get_storage_by_name,
-    get_storage_by_collection_id
+    get_storage_by_collection_id,
+    get_storage_by_id
 )
 from quartzwood.services.entity import get_all_entities
 from quartzwood.services.scryfall import(
@@ -35,7 +39,7 @@ from quartzwood.services.scryfall import(
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     with get_session() as session:
-        cards = get_cards_grouped(session)
+        cards = get_all_cards_grouped(session)
         collections = get_all_collections(session)
         storages = get_all_storage(session)
         return templates.TemplateResponse(
@@ -88,14 +92,21 @@ def api_get_all_storage():
     with get_session() as session:
         storages = get_all_storage(session)
         return[{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
-    
+
+"""
 @app.get("/api/storage/{storage_name}") # Storage by name
 def api_get_storage_by_name(storage_name: str):
     with get_session() as session:
         storages = get_storage_by_name(session, storage_name)
         if storages:
             return[{"id": storages.id, "name": storages.name, "description": storages.description, "collection_id": storages.collection_id}]    
-        
+"""    
+
+@app.get("/api/storage/{storage_id}") # Storage by id    
+def api_get_storage_by_id(storage_id: int):
+    with get_session() as session:
+        return get_storage_by_id(session, storage_id)
+
 @app.get("/api/storage/by-collection/{collection_name}") # Storage by Collection
 def api_get_storage_by_collection(collection_name: str):
     with get_session() as session:
@@ -139,13 +150,6 @@ def api_get_all_cards():
     with get_session() as session:
         return get_all_cards(session)
 
-@app.get("/api/storage/{storage_name}/cards") # Cards by Storage
-def api_get_cards_by_storage(storage_name: str):
-    with get_session() as session:
-        storage = get_storage_by_name(session, storage_name)
-        if storage is None:
-            return []
-        return get_grouped_cards_by_storage(session, storage.id)
 
 @app.get("/api/card/{card_id}") # Card by id
 def api_get_card(card_id: int):
@@ -168,7 +172,31 @@ def api_get_card(card_id: int):
             "acquired_date": str(card.acquired_date) if card.acquired_date else None,
             "purchase_price": card.purchase_price,
         }
-    
+
+
+@app.get("/api/storage/{storage_id}/cards") # Cards by Storage
+def api_get_cards_by_storage(storage_id: int):
+    with get_session() as session:
+        storage = get_cards_by_storage_id(session, storage_id)
+        if storage is None:
+            return []
+        return get_grouped_cards_by_storage(session, storage_id)
+
+    # Get Cards by collection
+@app.get("/api/collection/{collection_id}/cards")
+def api_get_cards_by_collection(collection_id: int):
+    #T0D0:
+    pass
+
+
+    # Get Cards by entity
+@app.get("/api/entity/{entity_id}/cards")
+def api_get_cards_by_entity(entity_id: int):
+    #T0D0
+    pass
+
+
+"""
 @app.get("/api/storage/{storage_name}/cards/{set_code}/{set_number}") # Card by Storage + setID
 def api_get_collated_storage_cards(
     storage_name: str,
@@ -184,21 +212,28 @@ def api_get_collated_storage_cards(
             storage_name=storage_name
         )
         return cards
-    
+"""  
+
     #endregion
     #region Update
-@app.put("/api/card/{card_id}") # Update Card by C-ID
-def api_update_card(card_id: int, data: dict = Body(...)):
+
+@app.put("/api/card/{card_id}")
+def api_update_card(card_id: int, data: dict):
     with get_session() as session:
-        card = get_card_by_id(session, card_id)
-        if card is None:
-            return JSONResponse(status_code=404, content={"detail": "Not found"})
-        for key, value in data.items():
-            if hasattr(card, key):
-                setattr(card, key, value)
-        session.add(card)
-        session.commit()
-        return {"success": True}
+        try:
+            card = update_card_by_id(
+                session=session,
+                c_id=card_id,
+                n_set_number=data.set_number or "",
+                n_set_code=data.set_code or "",
+                n_condition=data.condition,
+                n_foil=data.foil_type,
+                n_storage_id=data.storage_id,
+                n_notes=data.notes or ""
+            )
+            return {"success": True}
+        except ValueError as e:
+            return JSONResponse(status_code=404, content={"detail": str(e)})
     #endregion
     #region Delete
 @app.delete("/api/card/{card_id}") # Delete Card by C-ID
@@ -235,15 +270,15 @@ def api_refresh_scryfall(card_id: int):
         return {"success": True}
 #endregion
 #region Misc
-@app.get("/api/storage/{storage_name}/info") # Path by Storage
-def api_get_storage_info(storage_name: str):
+@app.get("/api/storage/{storage_id}/info") # Path by Storage
+def api_get_storage_info(storage_id: int):
     with get_session() as session:
-        storage = get_storage_by_name(session, storage_name)
+        storage = get_storage_by_id(session, storage_id)
         if storage is None:
-            return {"name": storage_name, "collection": None}
+            return {"name": storage.name, "collection": None}
         collection = None
         if storage.collection_id:
             col = get_collection_by_id(session, storage.collection_id)
             collection = col.name if col else None
-        return {"name": storage_name, "collection": collection}
+        return {"name": storage.name, "collection": collection}
 #endregion
