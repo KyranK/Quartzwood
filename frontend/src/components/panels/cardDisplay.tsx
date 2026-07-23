@@ -36,7 +36,7 @@ function CardDisplay({ card, onUpdate, onDelete }: CardDisplayProps) {
     const setChanged = updated.set_code !== currentCard.set_code || updated.set_number !== currentCard.set_number
     console.log('setChanged:', setChanged, updated.set_code, updated.set_number)
 
-    client.put(`/card/${updated.id}`, {
+    apiCards.updateCard(updated.id, {
         condition: updated.condition,
         foil_type: updated.foil_type,
         stamp_type: updated.stamp_type,
@@ -52,11 +52,11 @@ function CardDisplay({ card, onUpdate, onDelete }: CardDisplayProps) {
             client.post(`/card/${updated.id}/refresh-scryfall`)
                 .then(() => {
                     console.log('refresh-scryfall success')
-                    client.get<Card>(`/card/${updated.id}`)
-                        .then(res => {
-                            console.log('re-fetch success', res.data)
-                            setCurrentCard(res.data)
-                            onUpdate?.(res.data)
+                    apiCards.cardById(updated.id)
+                        .then(card => {
+                            console.log('re-fetch success', card)
+                            setCurrentCard(card)
+                            onUpdate?.(card)
                             seteditmode(false)
                         })
                 })

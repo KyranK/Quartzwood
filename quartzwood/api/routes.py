@@ -1,6 +1,7 @@
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi import Body
+from pydantic import BaseModel
 from quartzwood.api.app import app, templates
 from quartzwood.db import get_session
 from quartzwood.models.card import CardInstance
@@ -33,7 +34,6 @@ from quartzwood.services.scryfall import(
     get_card_by_set_and_number,
     extract_card_fields
 )
-
 
 #region Jinja2 (temporary)
 @app.get("/", response_class=HTMLResponse)
@@ -216,9 +216,20 @@ def api_get_collated_storage_cards(
 
     #endregion
     #region Update
+class CardUpdateRequest(BaseModel):
+    set_number: str | None = None
+    set_code: str | None = None
+    condition: str | None = None
+    foil_type: str | None = None
+    stamp_type: str | None = None
+    language: str | None = None
+    acquired_date: str | None = None
+    purchase_price: float | None = None
+    storage_id: int | None = None
+    notes: str | None = None
 
 @app.put("/api/card/{card_id}")
-def api_update_card(card_id: int, data: dict):
+def api_update_card(card_id: int, data: CardUpdateRequest):
     with get_session() as session:
         try:
             card = update_card_by_id(
