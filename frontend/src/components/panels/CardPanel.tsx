@@ -4,16 +4,16 @@ import EditButton from "../buttons/EditButton"
 import CardDetails from "./cardDetails"
 import { useState, useEffect } from "react"
 import CardEdit from "./cardEdit"
-import client from '../../api/client'
 import * as apiCards from "../../api/cards"
+import * as apiScry from "../../api/scryfall"
 
-interface CardDisplayProps {
+interface CardPanelProps {
     card: Card
     onUpdate?: (updated: Card) => void
     onDelete?: () => void
 }
 
-function CardDisplay({ card, onUpdate, onDelete }: CardDisplayProps) {
+function CardPanel({ card, onUpdate, onDelete }: CardPanelProps) {
 
     //
     const [editmode, seteditmode] = useState(false)
@@ -49,7 +49,7 @@ function CardDisplay({ card, onUpdate, onDelete }: CardDisplayProps) {
     .then(() => {
         console.log('PUT success')
         if (setChanged) {
-            client.post(`/card/${updated.id}/refresh-scryfall`)
+            apiScry.refresh_card_image(updated.id)
                 .then(() => {
                     console.log('refresh-scryfall success')
                     apiCards.cardById(updated.id)
@@ -92,4 +92,4 @@ function CardDisplay({ card, onUpdate, onDelete }: CardDisplayProps) {
     )
 }
 
-export default CardDisplay
+export default CardPanel

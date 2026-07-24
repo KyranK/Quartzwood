@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Panel from '../components/panels/panel'
-import CardDetails from '../components/panels/cardDetails'
+import CardPanel from '../components/panels/CardPanel'
 import CardSelection from '../components/panels/cardSelection'
-import CardDisplay from '../components/panels/cardDisplay'
+import CardDisplay from '../components/panels/CardPanel'
 import CardAdd from '../components/CardAdd'
 
 interface Card {
