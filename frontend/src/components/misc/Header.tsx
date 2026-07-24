@@ -1,10 +1,13 @@
+//File: Header.tsx
+//Component: Cross-site Banner
+//Use: Cross-site Banner
 import { useState } from 'react'
 import { useEffect} from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import client from '../api/client'
+import client from '../../api/client'
 
 export default function Header() {
-    const location = useLocation()
+    const location = useLocation() // URL path
     const parts = location.pathname.split('/').filter(Boolean)
     const [storageInfo, setStorageInfo] = useState<{name: string, collection: string | null} | null>(null)
 

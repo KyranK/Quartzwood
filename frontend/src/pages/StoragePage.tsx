@@ -5,8 +5,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import Panel from '../components/panels/panel'
 import CardPanel from '../components/panels/CardPanel'
 import CardSelection from '../components/panels/cardSelection'
-import CardDisplay from '../components/panels/CardPanel'
-import CardAdd from '../components/CardAdd'
+import CardAdd from '../components/misc/CardAdd'
 
 interface Card {
     id: number | null
@@ -81,7 +80,7 @@ export default function StoragePage() {
                 onClose={() => setShowPanel(false)}
                 context={
                     panelCard 
-                        ? <CardDisplay card={panelCard}  onUpdate={(updated) => { setPanelCard(updated); refreshCards();}} onDelete={() => {refreshCards();} } />
+                        ? <CardPanel card={panelCard}  onUpdate={(updated) => { setPanelCard(updated); refreshCards();}} onDelete={() => {refreshCards();} } />
                         : panelInstances !== null && panelInstances[0]
                             ? <CardSelection cards={panelInstances} onSelectCard={handleCardClick} />
                             : <LoadingSpinner />

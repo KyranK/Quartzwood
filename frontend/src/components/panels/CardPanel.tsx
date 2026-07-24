@@ -1,3 +1,7 @@
+//File: CardPanel.tsx
+//Component: panel-insert
+//Use: Panel to manage action-buttons and card sub-panels: [CardDetails, CardEdit] + DeleteBtn
+
 import type Card from "../../interfaces/card"
 import DeleteButton from "../buttons/DeleteButton"
 import EditButton from "../buttons/EditButton"
@@ -14,11 +18,10 @@ interface CardPanelProps {
 }
 
 function CardPanel({ card, onUpdate, onDelete }: CardPanelProps) {
-
-    //
-    const [editmode, seteditmode] = useState(false)
-    const [currentCard, setCurrentCard] = useState<Card>(card)
-
+    // Consts
+    const [editmode, seteditmode] = useState(false) // Toggle CardEdit Panel
+    const [currentCard, setCurrentCard] = useState<Card>(card) // Card RAM
+    // Funcs
     function handleDeleteCard(c_id: number | null){
         console.log("Request to delete card: " + ({c_id}) )
         if (c_id != null) {
@@ -33,43 +36,44 @@ function CardPanel({ card, onUpdate, onDelete }: CardPanelProps) {
         seteditmode(!editmode)
     }
     function handleSave(updated: Card) {   
-    const setChanged = updated.set_code !== currentCard.set_code || updated.set_number !== currentCard.set_number
-    console.log('setChanged:', setChanged, updated.set_code, updated.set_number)
+        const setChanged = updated.set_code !== currentCard.set_code || updated.set_number !== currentCard.set_number
+        console.log('setChanged:', setChanged, updated.set_code, updated.set_number)
 
-    apiCards.updateCard(updated.id, {
-        condition: updated.condition,
-        foil_type: updated.foil_type,
-        stamp_type: updated.stamp_type,
-        language: updated.language,
-        acquired_date: updated.acquired_date,
-        purchase_price: updated.purchase_price,
-        set_code: updated.set_code,
-        set_number: updated.set_number,
-    })
-    .then(() => {
-        console.log('PUT success')
-        if (setChanged) {
-            apiScry.refresh_card_image(updated.id)
-                .then(() => {
-                    console.log('refresh-scryfall success')
-                    apiCards.cardById(updated.id)
-                        .then(card => {
-                            console.log('re-fetch success', card)
-                            setCurrentCard(card)
-                            onUpdate?.(card)
-                            seteditmode(false)
-                        })
-                })
-        } else {
-            console.log('no set change, updating locally')
-            console.log('updated:', updated)
-            setCurrentCard(updated)
-            onUpdate?.(updated)
-            seteditmode(false)
-        }
-    })
-    .catch(err => console.error(err))
-}
+        //TODO: Change input to interface
+        apiCards.updateCard(updated.id, {
+            condition: updated.condition,
+            foil_type: updated.foil_type,
+            stamp_type: updated.stamp_type,
+            language: updated.language,
+            acquired_date: updated.acquired_date,
+            purchase_price: updated.purchase_price,
+            set_code: updated.set_code,
+            set_number: updated.set_number,
+        })
+        .then(() => {
+            console.log('PUT success')
+            if (setChanged) {
+                apiScry.refresh_card_image(updated.id)
+                    .then(() => {
+                        console.log('refresh-scryfall success')
+                        apiCards.cardById(updated.id)
+                            .then(card => {
+                                console.log('re-fetch success', card)
+                                setCurrentCard(card)
+                                onUpdate?.(card)
+                                seteditmode(false)
+                            })
+                    })
+            } else {
+                console.log('no set change, updating locally')
+                console.log('updated:', updated)
+                setCurrentCard(updated)
+                onUpdate?.(updated)
+                seteditmode(false)
+            }
+        })
+        .catch(err => console.error(err))
+    }
     //
 
     useEffect(() => {

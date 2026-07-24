@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage.tsx'
 import CollectionPage from './pages/CollectionPage.tsx'
 import StoragePage from './pages/StoragePage.tsx'
-import Header from './components/Header.tsx'
+import Header from './components/misc/Header.tsx'
 
 function App() {
   return (

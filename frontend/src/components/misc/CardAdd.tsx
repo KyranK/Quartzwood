@@ -1,8 +1,12 @@
+//File: CardAdd.tsx
+//Component: Widget
+//Use: Card-Constructed Form + API.post, on_submit -> run updater
+
 //Imports
 import { useState } from "react"
-import Card from "../interfaces/card"
-import client from "../api/client"
-import * as Enums from "../interfaces/enums"
+import Card from "../../interfaces/card"
+import client from "../../api/client"
+import * as Enums from "../../interfaces/enums"
 import { object } from "prop-types"
 
 // Interface
@@ -52,12 +56,19 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
 
     function OnSubmit(event: any){
         if(event?.preventDefault) event.preventDefault()
-
+        
+        // Remove whitespace and check for input
         const raw = cId.trim()
         if(!raw){
             return
         }
 
+        // Input interpreter
+        // code + number
+        //TODO:
+        // number + code
+        // year + name
+        // name -> redirect -> CardSelection.tsx
         const parts = raw.split(/[-\s]/).filter(Boolean)
         if(parts.length < 2){
             alert('Invalid format. Use: <set_code>-<set_number> (e.g. iko-152)')
@@ -65,7 +76,8 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
         }
         const set_code = parts[0]
         const set_number = parts[1]
-
+        
+        // ASUMING code/number:
         const payload: any = {
             set_code,
             set_number,
@@ -78,15 +90,16 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
             quantity: quantity || 1,
         }
 
-        if(acquiredDate) payload.acquired_date = acquiredDate
-        if(purchasePrice) payload.purchase_price = parseFloat(purchasePrice)
+        if(acquiredDate) payload.acquired_date = acquiredDate //FIX: IDK - FIX + add defualt
+        if(purchasePrice) payload.purchase_price = parseFloat(purchasePrice) //FIX: IDK - FIX + add defualt
 
         client.post('/add-cards', payload)
         .then(() => {
             console.log('Card Addeed: {' + {set_code} + "-" + {set_number} + "}")
             setShowAdvancedOptions(false)
             // optionally reset inputs
-            // setCId('')
+            //setCId("")
+            //
             setFormDefualt()
             onUpdate?.()
         })

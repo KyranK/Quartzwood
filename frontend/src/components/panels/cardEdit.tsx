@@ -1,7 +1,10 @@
+//File: cardEdit.tsx
+//Component: Panel-insert
+//Use: Takes card propeties and distrubes them into editable form -> form_submit: returns edited fields to lamda
 import type Card from "../../interfaces/card"
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
+import { useEffect, useState, type ChangeEvent, type SyntheticEvent } from "react"
 import * as Enums from "../../interfaces/enums"
-import * as APICards from "../../api/cards"
+
 
 interface CardEditProps {
     card: Card
@@ -38,7 +41,8 @@ function CardEdit({ card, onUndo, onSave}: CardEditProps) {
     })
 
     // Form Display Controls
-    const isSimpleFoil = formState.foil_type === "none" || formState.foil_type === "traditional"
+    //TODO: Change simpleFoils to enum + import
+    const isSimpleFoil = formState.foil_type === "none" || formState.foil_type === "traditional" 
     const [advancedFoil, setAdvancedFoil] = useState(!isSimpleFoil)
 
     // Enum Keys
@@ -52,7 +56,7 @@ function CardEdit({ card, onUndo, onSave}: CardEditProps) {
         setFormState(prev => ({ ...prev, [name]: value }))
     }
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
         event.preventDefault()
         const savedCard: Card = {
             ...card,                    // keep id, scryfall_id, name etc

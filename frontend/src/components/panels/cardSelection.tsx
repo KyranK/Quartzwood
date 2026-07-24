@@ -1,5 +1,8 @@
+//File: cardSelection.tsx
+//Componet: Panel-insert
+//Use: Lists card-Array and returns selected card
 import type Card from "../../interfaces/card"
-import LoadingSpinner from "../LoadingSpinner"
+
 
 interface CardSelectionProps {
     cards: Card[]
@@ -16,11 +19,13 @@ function CardSelection({ cards, onSelectCard }: CardSelectionProps) {
                     className="border-2 border-solid m-2 p-1 flex gap-2 w-full text-left"
                     onClick={() => onSelectCard?.(c)}
                 >
+                    {/*Card Img*/}
                     <img
                             src={`https://api.scryfall.com/cards/${c.scryfall_id}?format=image&version=normal`}
                             alt={c.name}
                             className="w-full rounded-lg shadow inline-30 flex-auto"
                         />
+                    {/*Card Description*/}
                     <div className="flex-auto ">
                         <p> {c.name} </p>
                         <p> {c.set_number}-{c.set_code} </p>

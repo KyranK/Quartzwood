@@ -1,8 +1,7 @@
+//File: cardDetails.tsx
+//Component: Panel-insert
+//Use: Takes cards and display card-fields in html table
 import type Card from "../../interfaces/card"
-import LoadingSpinner from "../LoadingSpinner"
-import DeleteButton from "../buttons/DeleteButton"
-import EditButton from "../buttons/EditButton"
-import { func, string } from "prop-types"
 
 interface CardDetailsProps {
     card: Card
