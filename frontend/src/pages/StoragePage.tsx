@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import LoadingSpinner from '../components/LoadingSpinner'
+import LoadingSpinner from '../components/misc/LoadingSpinner'
 import Panel from '../components/panels/panel'
 import CardPanel from '../components/panels/CardPanel'
 import CardSelection from '../components/panels/cardSelection'

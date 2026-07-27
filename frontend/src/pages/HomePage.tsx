@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import LoadingSpinner from '../components/LoadingSpinner'
+import LoadingSpinner from '../components/misc/LoadingSpinner'
 
 interface Collection {
   id: number
