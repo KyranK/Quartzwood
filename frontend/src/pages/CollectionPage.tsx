@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import LoadingSpinner from '../components/misc/LoadingSpinner'
+import StorageAdd from '../components/misc/StorageAdd'
 
 interface Storage {
   id: number
@@ -30,7 +31,10 @@ if (loading) return <LoadingSpinner />
         ← Back
       </button>
       <h1 className="text-2xl font-bold mb-6">{name}</h1>
-      <div className="grid grid-cols-1 gap-4">
+      <div className='p-4 ps-[80%]'>
+        <StorageAdd />
+      </div>
+      <div className="grid grid-cols-1 gap-4 p-4 pe-[30%]">
         {storages.map(s => (
           <div
             key={s.id}
