@@ -13,7 +13,12 @@ async function cardById(card_id: number | null): Promise<Card> {
 }
 
 async function cardsByStorage(storage_id: string): Promise<Card[]> {
-    const res = await client.get(`/api/storage/${storage_id}/cards`)
+    const res = await client.get(`/storage/${storage_id}/cards`)
+    return res.data
+}
+
+async function cardsByStorageSetNumber(storage_name:string, set_code: string, set_number: string): Promise<Card[]>{
+    const res = await client.get(`/storage/${storage_name}/cards/${set_code}/${set_number}`)
     return res.data
 }
 
@@ -39,6 +44,7 @@ export{
     addCard,
     cardById,
     cardsByStorage,
+    cardsByStorageSetNumber,
     updateCard,
     deleteCard,
 }

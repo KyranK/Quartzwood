@@ -17,15 +17,12 @@ def add_card(
     set_code: str,
     condition: Condition,
     quantity: int = 1,
-    storage_name: str = None,
+    storage_id: str = None,
     foil_type: FoilType = FoilType.none,
     stamp_type: StampType = StampType.none,
     language: str = "en",
     notes: str = None,
 ) -> list[CardInstance] | str:
-    # Local import to avoid circular dependancy with storage.py
-    from quartzwood.services.storage import get_storage_id_by_name
-
     """
     Resolves card via Scryfall then writes to DB.
     Returns the CardInstance on success, or an error string on failure.
@@ -36,12 +33,6 @@ def add_card(
         return f"Card not found: {set_code} {set_number}"
 
     fields = extract_card_fields(scryfall_data)
-    
-    storage_id = None
-    if storage_name: 
-        storage_id = get_storage_id_by_name(session,storage_name)
-        if storage_id is None:
-            raise ValueError(f"Collection '{storage_name}' not found")
 
     cards = []
     for _ in range(quantity):
@@ -104,7 +95,7 @@ def get_cards_filtered(
     set_code: str,
     condition: Condition = None,
     foil_type: FoilType = None,
-    storage_name: str = None,
+    storage_id: int = None,
 ) -> list[CardInstance]:
     # Local import to avoid circular dependancy with storage.py
     from quartzwood.services.storage import get_storage_id_by_name
@@ -118,8 +109,7 @@ def get_cards_filtered(
         query = query.where(CardInstance.condition == condition)
     if foil_type:
         query = query.where(CardInstance.foil_type == foil_type)
-    if storage_name:
-        storage_id = get_storage_id_by_name(session, storage_name)
+    if storage_id:
         query = query.where(CardInstance.storage_id == storage_id)
 
     return session.exec(query).all()

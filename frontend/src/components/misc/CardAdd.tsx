@@ -5,7 +5,7 @@
 //Imports
 import { useState } from "react"
 import Card from "../../interfaces/card"
-import client from "../../api/client"
+import * as apiCards from"../../api/cards"
 import * as Enums from "../../interfaces/enums"
 import { object } from "prop-types"
 
@@ -15,7 +15,7 @@ interface CardAddProps {
     onUpdate?: () => void
 }
 
-export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps){
+export default function CardAdd({ storage, onUpdate }: CardAddProps){
     // Conts
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
     const [cId, setCId] = useState("")
@@ -82,7 +82,7 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
             set_code,
             set_number,
             condition: condition || Enums.Condition.near_mint,
-            storage_name: storage,
+            storage_id: storage,
             foil_type: foilType || Enums.FoilType.none,
             stamp_type: stampType || Enums.StampType.none,
             language: language || 'en',
@@ -93,17 +93,17 @@ export default function CardAdd({ storage = "Unsorted", onUpdate }: CardAddProps
         if(acquiredDate) payload.acquired_date = acquiredDate //FIX: IDK - FIX + add defualt
         if(purchasePrice) payload.purchase_price = parseFloat(purchasePrice) //FIX: IDK - FIX + add defualt
 
-        client.post('/add-cards', payload)
-        .then(() => {
-            console.log('Card Addeed: {' + {set_code} + "-" + {set_number} + "}")
-            setShowAdvancedOptions(false)
-            // optionally reset inputs
-            //setCId("")
-            //
-            setFormDefualt()
-            onUpdate?.()
-        })
-        .catch(err => console.error(err))
+        apiCards.addCard(payload)
+            .then(() => {
+                console.log('Card Addeed: {' + {set_code} + "-" + {set_number} + "}")
+                setShowAdvancedOptions(false)
+                // optionally reset inputs
+                //setCId("")
+                //
+                setFormDefualt()
+                onUpdate?.()
+            })
+            .catch(err => console.error(err))
     }
 
 

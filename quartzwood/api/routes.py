@@ -130,7 +130,7 @@ def api_add_card(data: dict = Body(...)):
                 set_number=data["set_number"],
                 set_code=data["set_code"],
                 condition=data["condition"],
-                storage_name=data.get("storage_name"),
+                storage_id=data.get("storage_id"),
                 foil_type=data.get("foil_type", "none"),
                 stamp_type=data.get("stamp_type", "none"),
                 language=data.get("language", "en"),
@@ -196,23 +196,18 @@ def api_get_cards_by_entity(entity_id: int):
     pass
 
 
-"""
-@app.get("/api/storage/{storage_name}/cards/{set_code}/{set_number}") # Card by Storage + setID
+@app.get("/api/storage/{storage_id}/cards/{set_code}/{set_number}") # Card by Storage + setID
 def api_get_collated_storage_cards(
-    storage_name: str,
+    storage_id: str,
     set_code: str,
     set_number: int
 ):
     with get_session() as session:
-        storage = get_storage_by_name(session, storage_name)
-        if storage is None:
-            return []
         cards = get_cards_filtered(
             session, set_number, set_code,
-            storage_name=storage_name
+            storage_id=storage_id
         )
         return cards
-"""  
 
     #endregion
     #region Update

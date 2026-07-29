@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import client from '../api/client'
+import * as apiCards from "../api/cards"
+import * as apiStorage from "../api/storages"
 import LoadingSpinner from '../components/misc/LoadingSpinner'
 import Panel from '../components/panels/panel'
 import CardPanel from '../components/panels/CardPanel'
 import CardSelection from '../components/panels/cardSelection'
 import CardAdd from '../components/misc/CardAdd'
+import { string } from 'prop-types'
 
 interface Card {
     id: number | null
@@ -35,37 +37,37 @@ export default function StoragePage() {
     const [showPanel, setShowPanel] = useState(false)
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
     const refreshCards = () => {
-        client.get<Card[]>(`/storage/${Number(storage_id)}/cards`)
-            .then(res => setCards(res.data))
+        apiCards.cardsByStorage(String(storage_id))
+            .then(res => setCards(res))
     }
 
 
     const handleCardClick = (c: Card) => {
-        console.log("@ ImgClick")
         setPanelCard(null)
         setPanelInstances(null)
 
         if (c.id) {
             // This is an individual card instance, so show its details.
-            client.get<Card>(`/card/${c.id}`)
+            apiCards.cardById(c.id)
                 .then(res => {
-                    setPanelCard(res.data)
+                    setPanelCard(res)
                 })
         } else {
             // This is a grouped card, so show the matching instances.
-            client.get<Card[]>(`/storage/${Number(storage_id)}/cards/${c.set_code}/${c.set_number}`)
+            //apiCards.cardsByStorage(String(storage_id))
+            apiCards.cardsByStorageSetNumber(String(storage_id),String(c.set_code), String(c.set_number))
                 .then(res => {
-                    setPanelInstances(res.data)
+                    setPanelInstances(res)
                 })
         }
         setShowPanel(true)
     }
 
     useEffect(() => {
-        client.get<Storage>(`/storage/${storage_id}`)
-        .then(res => {setStorageName((res.data.name))})
-        client.get<Card[]>(`/storage/${storage_id}/cards`)
-            .then(res => setCards(res.data))
+        apiStorage.storageById(String(storage_id))
+            .then(res => {setStorageName((res.name))})
+        apiCards.cardsByStorage(String(storage_id))
+            .then(res => setCards(res))
             .finally(() => setLoading(false))
     }, [storage_id])
 
