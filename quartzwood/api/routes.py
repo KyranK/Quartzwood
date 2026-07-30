@@ -22,6 +22,7 @@ from quartzwood.services.collection import (
     get_collections_by_entity_id,
     get_collection_by_name,
     get_collection_by_id,
+    create_collection,
     )
 from quartzwood.services.storage import(
     get_all_storage,
@@ -65,6 +66,23 @@ def api_get_all_entities():
     #endregion
 #endregion
 #region Collections
+    #region Add
+@app.post("/api/add-collection")
+def api_add_collection(data: dict = Body(...)):
+    with get_session() as session:
+        try:
+            result = create_collection(
+                session = session,
+                name = data["name"],
+                description = data["description"],
+            )
+            if isinstance(result, str):
+                return JSONResponse(status_code=400, content={"detail": result})
+            return {"success": True}
+
+        except ValueError as e:
+            return JSONResponse(status_code=400, content={"detail": str(e)})
+    #endregion
     #region Read
 @app.get("/api/collections/") # All Collections
 def api_get_all_collections():
@@ -111,8 +129,6 @@ def api_add_storage(data: dict = Body(...)):
 
         except ValueError as e:
             return JSONResponse(status_code=400, content={"detail": str(e)})
-            
-
 
     #endregion
     #region Read

@@ -3,7 +3,7 @@ import Collection from "../interfaces/collection";
 
 //region POST   
 async function addCollection(data: object) {
-    
+    const res = await client.post(`/add-collection`, data)
 }
 //endregion
 //region GET
