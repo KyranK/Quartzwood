@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import LoadingSpinner from '../components/misc/LoadingSpinner'
 import StorageAdd from '../components/misc/StorageAdd'
+import Collection from '../interfaces/collection'
 
 interface Storage {
   id: number
@@ -12,12 +13,16 @@ interface Storage {
 }
 
 export default function CollectionPage() {
-  const { name } = useParams<{ name: string }>()
+  const { collection_id } = useParams<{ collection_id: string }>()
+  const [name, setName] = useState("")
   const [storages, setStorages] = useState<Storage[]>([])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true) // Loading distraction
 
   useEffect(() => {
+    client.get<Collection>(`/collection/${collection_id}`)
+    .then(res => setName(res.data.name))
+
     client.get<Storage[]>(`/storage/by-collection/${name}`)
     .then(res => setStorages(res.data))
     .finally(() => setLoading(false))

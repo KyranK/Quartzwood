@@ -34,7 +34,7 @@ if (loading) return <LoadingSpinner />
         {collections.map(c => (
           <div
             key={c.id}
-            onClick={() => navigate(`/collection/${c.name}`)}
+            onClick={() => navigate(`/collection/${c.id}`)}
             className="p-4 border rounded cursor-pointer hover:bg-gray-100"
           >
             <h2 className="text-lg font-semibold">{c.name}</h2>

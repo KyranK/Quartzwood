@@ -27,7 +27,7 @@ from quartzwood.services.storage import(
     get_all_storage,
     get_storage_by_name,
     get_storage_by_collection_id,
-    get_storage_by_id
+    get_storage_by_id,
 )
 from quartzwood.services.entity import get_all_entities
 from quartzwood.services.scryfall import(
@@ -83,6 +83,12 @@ def api_get_collections_by_entity(entity_id: int):
     with get_session() as session:
         collections = get_collections_by_entity_id(session, entity_id)
         return [{"id": c.id, "name": c.name, "description": c.description, "location": c.location, "owner_id": c.entity_id,} for c in collections]
+
+
+@app.get("/api/collection/{collection_id}") # collection by id
+def api_get_collection_by_id(collection_id: int):
+    with get_session() as session:
+        return get_collection_by_id(session, collection_id)
     #endregion
 #endregion
 #region Storages
@@ -115,6 +121,9 @@ def api_get_storage_by_collection(collection_name: str):
             return []
         storages = get_storage_by_collection_id(session, collection.id)
         return [{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
+
+
+
     #endregion
 #endregion
 #region Cards

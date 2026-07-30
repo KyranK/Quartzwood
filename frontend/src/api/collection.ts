@@ -19,7 +19,6 @@ async function collectionsByEntityId(entity_id: number): Promise<Collection[]> {
     const res = await client.get<Collection[]>(`/entities/${entity_id}/collections`)
     return res.data
 }
-// Cards by Collection
 
 // cards by Entity
 
