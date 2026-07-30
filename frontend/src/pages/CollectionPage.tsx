@@ -27,19 +27,24 @@ export default function CollectionPage() {
 if (loading) return <LoadingSpinner />
   return (
     <div className="p-8">
-      <button onClick={() => navigate('/')} className="mb-4 text-blue-500 hover:underline">
-        ← Back
-      </button>
-      <h1 className="text-2xl font-bold mb-6">{name}</h1>
-      <div className='p-4 ps-[80%]'>
-        <StorageAdd />
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <button onClick={() => navigate('/')} className="mb-2 text-blue-500 hover:underline">
+            ← Back
+          </button>
+          <h1 className="text-2xl font-bold">{name}</h1>
+        </div>
+        <div className="w-[20%] pr-[22%] pt-[1%]">
+          <StorageAdd />
+        </div>
       </div>
-      <div className="grid grid-cols-1 gap-4 p-4 pe-[30%]">
+      <div className="grid grid-cols-1 gap-4 p-4 ">
+
         {storages.map(s => (
           <div
             key={s.id}
             onClick={() => navigate(`/storage/${s.id}`)}
-            className="p-4 border rounded cursor-pointer hover:bg-gray-100"
+            className="p-4 border rounded cursor-pointer hover:bg-gray-100 w-[25%]"
           >
             <h2 className="text-lg font-semibold">{s.name}</h2>
           </div>
