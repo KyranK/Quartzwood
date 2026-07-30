@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import LoadingSpinner from '../components/misc/LoadingSpinner'
 import StorageAdd from '../components/misc/StorageAdd'
-import Collection from '../interfaces/collection'
 import * as apiCollection from '../api/collection'
 import * as apiStorage from '../api/storage'
 
@@ -44,13 +43,13 @@ if (loading) return <LoadingSpinner />
           <StorageAdd collection_id={collection_id}/>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-4 p-4 ">
+      <div className="grid grid-cols-1 gap-4 p-4 w-[25%]">
 
         {storages.map(s => (
           <div
             key={s.id}
             onClick={() => navigate(`/storage/${s.id}`)}
-            className="p-4 border rounded cursor-pointer hover:bg-gray-100 w-[25%]"
+            className="p-4 border rounded cursor-pointer hover:bg-gray-100"
           >
             <h2 className="text-lg font-semibold">{s.name}</h2>
           </div>

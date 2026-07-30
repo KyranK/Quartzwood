@@ -2,7 +2,9 @@ import client from "./client";
 import Collection from "../interfaces/collection";
 
 //region POST   
-
+async function addCollection(data: object) {
+    
+}
 //endregion
 //region GET
 async function allCollections(): Promise<Collection[]> {
@@ -35,4 +37,5 @@ export{
     allCollections,
     collectionById,
     collectionsByEntityId, 
+    addCollection,
 }

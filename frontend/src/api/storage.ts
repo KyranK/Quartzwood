@@ -2,7 +2,9 @@ import client from "./client";
 import Storage from "../interfaces/storage";
 
 //region POST   
-
+async function addStorage(data: object): Promise<void> {
+    await client.post("/add-storage", data)
+}
 //endregion
 //region GET
 async function allStorages(): Promise<Storage[]>  {
@@ -42,4 +44,5 @@ export{
     storageById,
     storagesByCollectionID,
     storageRouteInfo,
+    addStorage,
 }
