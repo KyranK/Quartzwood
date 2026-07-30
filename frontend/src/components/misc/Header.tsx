@@ -4,19 +4,25 @@
 import { useState } from 'react'
 import { useEffect} from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import client from '../../api/client'
+import * as apiStorage from '../../api/storage'
+import * as apiCollection from '../../api/collection'
 
 export default function Header() {
     const location = useLocation() // URL path
     const parts = location.pathname.split('/').filter(Boolean)
     const [storageInfo, setStorageInfo] = useState<{name: string, collection: string | null} | null>(null)
+    const [collectionName, SetCollectionName] = useState("")
 
     useEffect(() => {
         if (parts[0] === 'storage') {
-            client.get(`/storage/${parts[1]}/info`)
-                .then(res => setStorageInfo(res.data))
+            apiStorage.storageRouteInfo(parts[1])
+                .then(res => setStorageInfo(res))
         } else {
             setStorageInfo(null)
+        }
+        if(parts[0] === 'collection') {
+            apiCollection.collectionById(Number(parts[1]))
+                .then(res => SetCollectionName(res.name))
         }
     }, [location.pathname])
     
@@ -32,7 +38,7 @@ export default function Header() {
                     <>
                     <span>›</span>
                     <Link to={`/collection/${parts[1]}`} className="hover:text-white">
-                        {parts[1]}
+                        {collectionName}
                     </Link>
                     </>
                 )}
