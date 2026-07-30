@@ -3,25 +3,26 @@ import { useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import LoadingSpinner from '../components/misc/LoadingSpinner'
 import CollectionAdd from '../components/misc/CollectionAdd'
-
-interface Collection {
-  id: number
-  name: string
-  description: string | null
-  location: string | null
-  owner_id: number | null
-}
+import * as apiCollection from "../api/collection"
+import Collection from '../interfaces/collection'
 
 export default function HomePage() {
   const [collections, setCollections] = useState<Collection[]>([]) // DB 
   const navigate = useNavigate() // Routes
   const [loading, setLoading] = useState(true) // Loading distraction
 
-useEffect(() => {
-    client.get<Collection[]>('/collections/')
+  const refreshCollections = () => {
+    apiCollection.allCollections()
     .then(res => {
-        console.log('data:', res.data)
-        setCollections(res.data)
+        setCollections(res)
+    })
+  }
+
+useEffect(() => {
+    apiCollection.allCollections()
+    .then(res => {
+        console.log('data:', res)
+        setCollections(res)
     })
     .finally(() => setLoading(false))
 }, [])
@@ -33,7 +34,7 @@ if (loading) return <LoadingSpinner />
       <div className="flex items-start justify-between mb-6">
         <h1 className="text-2xl font-bold mb-6">Collections</h1>
         <div className="w-[20%] pr-[22%] pt-[1%]">
-          <CollectionAdd />
+          <CollectionAdd onUpdate={refreshCollections } />
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 w-[30%]">

@@ -28,11 +28,12 @@ export default function CollectionAdd({onUpdate }: CollectionAddProps) {
         apiCollection.addCollection(payload)
         .then(() => {
             console.log("Collection: " + collectionName)
+            onUpdate?.()
         })
         
         setCollectionName("")
         setCollectionDesc("")
-        onUpdate?.()
+        
     }
 
     return (        

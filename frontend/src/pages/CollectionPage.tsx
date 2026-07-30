@@ -4,6 +4,8 @@ import LoadingSpinner from '../components/misc/LoadingSpinner'
 import StorageAdd from '../components/misc/StorageAdd'
 import * as apiCollection from '../api/collection'
 import * as apiStorage from '../api/storage'
+import Popup from '../components/popup/popup'
+import DeleteConfirm from '../components/popup/deleteConfirm' 
 
 interface Storage {
   id: number
@@ -18,6 +20,13 @@ export default function CollectionPage() {
   const [storages, setStorages] = useState<Storage[]>([])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true) // Loading distraction
+
+  const [showPopup, setShowPopup] = useState(true)
+
+  const refreshStorages = () => {
+    apiStorage.storagesByCollectionID(String(collection_id))
+    .then(res => setStorages(res))
+  }
 
   useEffect(() => {
     apiCollection.collectionById(Number(collection_id))
@@ -40,9 +49,16 @@ if (loading) return <LoadingSpinner />
           <h1 className="text-2xl font-bold">{name}</h1>
         </div>
         <div className="w-[20%] pr-[22%] pt-[1%]">
-          <StorageAdd collection_id={collection_id}/>
+          <StorageAdd collection_id={collection_id} onUpdate={refreshStorages}/>
         </div>
       </div>
+
+      <Popup
+                showpopup={showPopup}
+                onClose={() => setShowPopup(false)}
+                context={<DeleteConfirm onDelete={() => {}}/>}
+        />
+
       <div className="grid grid-cols-1 gap-4 p-4 w-[25%]">
 
         {storages.map(s => (

@@ -29,11 +29,12 @@ export default function StorageAdd({ collection_id, onUpdate }: StorageAddProps)
         apiStorage.addStorage(payload)
         .then(() => {
             console.log("Storage: " + storageName)
+            onUpdate?.()
         })
         
         setStorageName("")
         setStorageDesc("")
-        onUpdate?.()
+        
     }
 
     return (        
