@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import * as apiCards from "../api/cards"
-import * as apiStorage from "../api/storages"
+import * as apiStorage from "../api/storage"
 import LoadingSpinner from '../components/misc/LoadingSpinner'
 import Panel from '../components/panels/panel'
 import CardPanel from '../components/panels/CardPanel'

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import client from '../api/client'
 import LoadingSpinner from '../components/misc/LoadingSpinner'
 import StorageAdd from '../components/misc/StorageAdd'
 import Collection from '../interfaces/collection'
+import * as apiCollection from '../api/collection'
+import * as apiStorage from '../api/storage'
 
 interface Storage {
   id: number
@@ -20,11 +21,11 @@ export default function CollectionPage() {
   const [loading, setLoading] = useState(true) // Loading distraction
 
   useEffect(() => {
-    client.get<Collection>(`/collection/${collection_id}`)
-    .then(res => setName(res.data.name))
+    apiCollection.collectionById(Number(collection_id))
+    .then(res => setName(res.name))
 
-    client.get<Storage[]>(`/storage/by-collection/${name}`)
-    .then(res => setStorages(res.data))
+    apiStorage.storagesByCollectionID(String(collection_id))
+    .then(res => setStorages(res))
     .finally(() => setLoading(false))
   }, [name])
 

@@ -113,13 +113,10 @@ def api_get_storage_by_id(storage_id: int):
     with get_session() as session:
         return get_storage_by_id(session, storage_id)
 
-@app.get("/api/storage/by-collection/{collection_name}") # Storage by Collection
-def api_get_storage_by_collection(collection_name: str):
+@app.get("/api/storage/by-collection/{collection_id}") # Storage by Collection
+def api_get_storage_by_collection(collection_id: str):
     with get_session() as session:
-        collection = get_collection_by_name(session, collection_name)
-        if collection is None:
-            return []
-        storages = get_storage_by_collection_id(session, collection.id)
+        storages = get_storage_by_collection_id(session, collection_id)
         return [{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
 
 
