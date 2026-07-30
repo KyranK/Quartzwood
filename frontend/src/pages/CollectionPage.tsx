@@ -41,7 +41,7 @@ if (loading) return <LoadingSpinner />
           <h1 className="text-2xl font-bold">{name}</h1>
         </div>
         <div className="w-[20%] pr-[22%] pt-[1%]">
-          <StorageAdd />
+          <StorageAdd collection_id={collection_id}/>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 p-4 ">

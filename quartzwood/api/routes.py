@@ -28,6 +28,7 @@ from quartzwood.services.storage import(
     get_storage_by_name,
     get_storage_by_collection_id,
     get_storage_by_id,
+    create_storage,
 )
 from quartzwood.services.entity import get_all_entities
 from quartzwood.services.scryfall import(
@@ -92,6 +93,28 @@ def api_get_collection_by_id(collection_id: int):
     #endregion
 #endregion
 #region Storages
+    #region Add
+@app.post("/api/add-storage") # Add Storage
+def api_add_storage(data: dict = Body(...)):
+    with get_session() as session:
+        try:
+            result = create_storage(
+                session = session,
+                name = data["name"],
+                collection_id = data["collection_id"],
+                description = data["description"],
+            )
+
+            if isinstance(result, str):
+                return JSONResponse(status_code=400, content={"detail": result})
+            return {"success": True}
+
+        except ValueError as e:
+            return JSONResponse(status_code=400, content={"detail": str(e)})
+            
+
+
+    #endregion
     #region Read
 @app.get("/api/storage") # All storages
 def api_get_all_storage():

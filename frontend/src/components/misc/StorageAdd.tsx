@@ -7,6 +7,7 @@ import Storage from "../../interfaces/storage"
 import * as apiCards from"../../api/cards"
 import * as Enums from "../../interfaces/enums"
 import { object } from "prop-types"
+import client from "../../api/client"
 
 interface StorageAddProps {
     collection_id?: string
@@ -22,6 +23,17 @@ export default function StorageAdd({ collection_id, onUpdate }: StorageAddProps)
         if (!storageName.trim()) return
         // TODO: call API to create the storage
         console.log("Create storage:", { name: storageName, description: storageDesc, collection_id })
+        const payload: object = {
+            name: storageName,
+            collection_id: String(collection_id),
+            description: storageDesc
+        }
+
+        client.post(`add-storage`, payload)
+        .then(() => {
+            console.log("Storage: " + storageName)
+        })
+        
         setStorageName("")
         setStorageDesc("")
         onUpdate?.()

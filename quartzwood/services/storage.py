@@ -11,14 +11,11 @@ from quartzwood.services.cards import get_cards_by_storage_id
 
 #region Storage
     #region Create
-def create_storage(session: Session, name: str, collection_name: str = None, description: str = None) -> Storage:
-    collection_id = None
-    if collection_name:
-        collection_id = get_collection_id_by_name(session, collection_name)
-        if collection_id is None:
-            raise ValueError(f"Collection '{collection_name}' not found")
-        
-    storage = Storage(name=name, collection_id=collection_id, description=description)
+def create_storage(session: Session, name: str, collection_id: str = None, description: str = None) -> Storage:
+    if collection_id is None:
+        raise ValueError(f"Collection '{collection_name}' not found")
+            
+    storage = Storage(name=name, collection_id=int(collection_id), description=description)
     session.add(storage)
     session.commit()
     session.refresh(storage)
