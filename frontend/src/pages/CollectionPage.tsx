@@ -22,15 +22,32 @@ export default function CollectionPage() {
   const [loading, setLoading] = useState(true) // Loading distraction
 
   const [showPopup, setShowPopup] = useState(false)
+  const [selectedStorage, setSelectedStorage] = useState<number>(-1)
 
   const refreshStorages = () => {
     apiStorage.storagesByCollectionID(String(collection_id))
-    .then(res => setStorages(res))
+    .then(res => {
+      setStorages(res)
+      setSelectedStorage(-1)
+    })
   }
 
-  const handleDeleteButton = () => {
+  const handleDeleteButton = (id: number) => {
+    setSelectedStorage(id)
     setShowPopup(true)
   }
+
+  const handlePopOffClick = () => {
+    setShowPopup(false)
+    setSelectedStorage(-1)
+  }
+
+  const handlePopDeleteConfirm = () => {
+    console.log('Request to delete Storage with ID of: ' + String(selectedStorage))
+    handlePopOffClick()
+  }
+
+
 
   useEffect(() => {
     apiCollection.collectionById(Number(collection_id))
@@ -59,8 +76,8 @@ if (loading) return <LoadingSpinner />
 
       <Popup
                 showpopup={showPopup}
-                onClose={() => setShowPopup(false)}
-                context={<DeleteConfirm onDelete={() => {}}/>}
+                onClose={() => {handlePopOffClick()}}
+                context={<DeleteConfirm onDelete={handlePopDeleteConfirm}/>}
         />
 
       <div className="grid grid-cols-1 gap-4 p-4 w-[25%]">
@@ -79,7 +96,7 @@ if (loading) return <LoadingSpinner />
               rounded-r-xl bg-red-600 text-white w-6 h-9 shadow-sm hover:bg-red-700 focus:outline-none 
               focus:ring-2 focus:ring-red-400 hover:-right-9 hover:w-9"
               aria-label={`Delete ${s.name}`}
-              onClick={(e) => { e.stopPropagation(); handleDeleteButton() }}
+              onClick={(e) => { e.stopPropagation(); handleDeleteButton(s.id) }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} className="w-4 h-4" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
