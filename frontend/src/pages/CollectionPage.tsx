@@ -21,11 +21,15 @@ export default function CollectionPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true) // Loading distraction
 
-  const [showPopup, setShowPopup] = useState(true)
+  const [showPopup, setShowPopup] = useState(false)
 
   const refreshStorages = () => {
     apiStorage.storagesByCollectionID(String(collection_id))
     .then(res => setStorages(res))
+  }
+
+  const handleDeleteButton = () => {
+    setShowPopup(true)
   }
 
   useEffect(() => {
@@ -62,12 +66,25 @@ if (loading) return <LoadingSpinner />
       <div className="grid grid-cols-1 gap-4 p-4 w-[25%]">
 
         {storages.map(s => (
-          <div
-            key={s.id}
-            onClick={() => navigate(`/storage/${s.id}`)}
-            className="p-4 border rounded cursor-pointer hover:bg-gray-100"
-          >
-            <h2 className="text-lg font-semibold">{s.name}</h2>
+          <div key={s.id} className="relative">
+            <div
+              onClick={() => navigate(`/storage/${s.id}`)}
+              className="p-4 border rounded cursor-pointer hover:bg-gray-100"
+            >
+              <h2 className="text-lg font-semibold">{s.name}</h2>
+            </div>
+
+            <button
+              className="absolute top-1 -right-6 inline-flex items-center justify-center 
+              rounded-r-xl bg-red-600 text-white w-6 h-9 shadow-sm hover:bg-red-700 focus:outline-none 
+              focus:ring-2 focus:ring-red-400 hover:-right-9 hover:w-9"
+              aria-label={`Delete ${s.name}`}
+              onClick={(e) => { e.stopPropagation(); handleDeleteButton() }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} className="w-4 h-4" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         ))}
       </div>
