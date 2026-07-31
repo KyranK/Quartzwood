@@ -333,8 +333,10 @@ def api_get_storage_info(storage_id: int):
         if storage is None:
             return {"name": storage.name, "collection": None}
         collection = None
+        collection_id = -1
         if storage.collection_id:
             col = get_collection_by_id(session, storage.collection_id)
             collection = col.name if col else None
-        return {"name": storage.name, "collection": collection}
+            collection_id = col.id
+        return {"name": storage.name, "collection": collection, "collection_id": collection_id}
 #endregion

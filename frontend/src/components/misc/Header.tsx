@@ -10,7 +10,7 @@ import * as apiCollection from '../../api/collection'
 export default function Header() {
     const location = useLocation() // URL path
     const parts = location.pathname.split('/').filter(Boolean)
-    const [storageInfo, setStorageInfo] = useState<{name: string, collection: string | null} | null>(null)
+    const [storageInfo, setStorageInfo] = useState<{name: string, collection: string | null, collection_id: number | null} | null>(null)
     const [collectionName, SetCollectionName] = useState("")
 
     useEffect(() => {
@@ -49,7 +49,7 @@ export default function Header() {
                     {storageInfo.collection && (
                         <>
                         <span>›</span>
-                        <Link to={`/collection/${storageInfo.collection}`} className="hover:text-white">
+                        <Link to={`/collection/${storageInfo.collection_id}`} className="hover:text-white">
                             {storageInfo.collection}
                         </Link>
                         </>
