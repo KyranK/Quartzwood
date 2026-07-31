@@ -30,6 +30,7 @@ from quartzwood.services.storage import(
     get_storage_by_collection_id,
     get_storage_by_id,
     create_storage,
+    delete_storage,
 )
 from quartzwood.services.entity import get_all_entities
 from quartzwood.services.scryfall import(
@@ -157,8 +158,12 @@ def api_get_storage_by_collection(collection_id: str):
     with get_session() as session:
         storages = get_storage_by_collection_id(session, collection_id)
         return [{"id": s.id, "name": s.name, "description": s.description, "collection_id": s.collection_id} for s in storages]
-
-
+    #endregion
+    #region Delete
+@app.delete("/api/storage/{storage_id}")
+def api_delete_storage_by_id(storage_id: str):
+    with get_session() as session:
+        return delete_storage(session, storage_id, force_flag=True)
 
     #endregion
 #endregion

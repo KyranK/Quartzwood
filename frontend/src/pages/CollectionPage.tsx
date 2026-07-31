@@ -43,8 +43,13 @@ export default function CollectionPage() {
   }
 
   const handlePopDeleteConfirm = () => {
-    console.log('Request to delete Storage with ID of: ' + String(selectedStorage))
+    apiStorage.deleteStorageById(selectedStorage)
+    .then(res => {
+      console.log("Storage: " + String(sessionStorage) + " was deleted")
+      refreshStorages()
+    })
     handlePopOffClick()
+    
   }
 
 

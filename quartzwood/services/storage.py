@@ -85,37 +85,38 @@ def update_storage(
     #region Delete
 def delete_storage(
     session: Session,
-    storage_name: str,
+    storage_id: str,
     # Orphanage
-    relocate_storage_name: str = None,
+    relocate_storage_id: str = None,
     force_flag: bool = False,
 ) -> Storage:
+    from quartzwood.services.cards import delete_card_by_id
+    
     # check if storage exist -> get id
-    storage_id = get_storage_id_by_name(session, storage_name)
-    if storage_id is None:
-        raise ValueError(f"Storage '{storage_name}' not found")
+    storage = get_storage_by_id(session, storage_id)
+    if storage is None:
+        raise ValueError(f"Storage '{storage_id}' not found")
     
     # get cards from storage
     cards = get_cards_by_storage_id(session, storage_id)
     if cards:
     # Relocate cards
         # relocate
-        if relocate_storage_name:
-            new_storage_id = get_storage_id_by_name(session, relocate_storage_name)
-            if new_storage_id is None:
-                raise ValueError(f"Storage to relocate to: '{relocate_storage_name}' not found")
+        if relocate_storage_id:
+            new_storage = get_storage_by_id(session, relocate_storage_id)
+            if new_storage is None:
+                raise ValueError(f"Storage to relocate to: '{relocate_storage_id}' not found")
             
             for card in cards:
-                card.storage_id = new_storage_id
+                card.storage_id = relocate_storage_id
                 session.add(card)
         # force orphanage
         elif force_flag:
             for card in cards:
-                card.storage_id = None
-                session.add(card)
+                delete_card_by_id(card.id)
         # Raise
         else:
-            raise ValueError(f"Storage '{storage_name}' has {len(cards)} card(s). Use --relocate or --force.")
+            raise ValueError(f"Storage '{storage_id}' has {len(cards)} card(s). Use --relocate or --force.")
 
     # Delete storage
     storage = session.get(Storage, storage_id)

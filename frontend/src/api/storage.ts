@@ -23,7 +23,7 @@ async function storagesByCollectionID(collection_id: string): Promise<Storage[]>
 }
 
 async function storageRouteInfo(storage_id: string): Promise<any> {
-    const res = await client(`/storage/${storage_id}/info`)
+    const res = await client.get(`/storage/${storage_id}/info`)
     return res.data
 }
 // Cards by Collection
@@ -35,7 +35,10 @@ async function storageRouteInfo(storage_id: string): Promise<any> {
 
 //endregion
 //region DELETE
-
+async function deleteStorageById(storage_id:number): Promise<Storage> {
+    const res = await client.delete(`/storage/${storage_id}`)
+    return res.data
+}
 //endregion
 
 
@@ -45,4 +48,5 @@ export{
     storagesByCollectionID,
     storageRouteInfo,
     addStorage,
+    deleteStorageById,
 }
