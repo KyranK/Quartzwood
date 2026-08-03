@@ -1,5 +1,6 @@
 import client from "./client";
 import Collection from "../interfaces/collection";
+import { any } from "prop-types";
 
 //region POST   
 async function addCollection(data: object) {
@@ -29,7 +30,10 @@ async function collectionsByEntityId(entity_id: number): Promise<Collection[]> {
 
 //endregion
 //region DELETE
-
+async function deleteCollectionById(collection_id: number): Promise<Collection> {
+    const res = await client.delete(`/collection/${collection_id}`)
+    return res.data
+}
 //endregion
 
 
@@ -38,4 +42,5 @@ export{
     collectionById,
     collectionsByEntityId, 
     addCollection,
+    deleteCollectionById,
 }

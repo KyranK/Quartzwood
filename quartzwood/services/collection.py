@@ -74,33 +74,32 @@ def update_collection(
     #region Delete
 def delete_collection(  
     session: Session,
-    collection_name: str,
-    relocate_collection_name: str = None,
+    collection_id: int,
+    relocate_collection_id: int = None,
     force: bool = False
 ) -> Collection:
     # local import to avoid circular dependency with storage.py
     from quartzwood.services.storage import get_storage_by_collection_id
 
-    collection_id = get_collection_id_by_name(session, collection_name)
+    collection = get_collection_by_id(session, collection_id)
     if collection_id is None:
-        raise ValueError(f"Collection '{collection_name}' not found")
+        raise ValueError(f"Collection '{collection.name}' not found")
     
     storages = get_storage_by_collection_id(session, collection_id)
     
     if storages:
-        if relocate_collection_name:
-            relocate_id = get_collection_id_by_name(session, relocate_collection_name)
-            if relocate_id is None:
-                raise ValueError(f"Relocate target '{relocate_collection_name}' not found")
+        if relocate_collection_id:
+            if relocate_collection_id is None:
+                raise ValueError(f"Relocate target '{relocate_collection_id}' not found")
             for storage in storages:
-                storage.collection_id = relocate_id
+                storage.collection_id = relocate_collection_id
                 session.add(storage)
         elif force:
             for storage in storages:
                 storage.collection_id = None
                 session.add(storage)
         else:
-            raise ValueError(f"Collection '{collection_name}' has {len(storages)} storage(s). Use --relocate or --force.")
+            raise ValueError(f"Collection '{collection_id}' has {len(storages)} storage(s). Use --relocate or --force.")
     
 
     collection = session.get(Collection, collection_id)

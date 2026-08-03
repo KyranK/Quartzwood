@@ -23,6 +23,7 @@ from quartzwood.services.collection import (
     get_collection_by_name,
     get_collection_by_id,
     create_collection,
+    delete_collection,
     )
 from quartzwood.services.storage import(
     get_all_storage,
@@ -109,6 +110,14 @@ def api_get_collections_by_entity(entity_id: int):
 def api_get_collection_by_id(collection_id: int):
     with get_session() as session:
         return get_collection_by_id(session, collection_id)
+
+
+@app.delete("/api/collection/{collection_id}") #delete Collection
+def api_delete_collection_by_id(collection_id: int):
+    with get_session() as session:
+        return delete_collection(session, collection_id, force=True)
+
+
     #endregion
 #endregion
 #region Storages
