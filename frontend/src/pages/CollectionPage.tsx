@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import LoadingSpinner from '../components/misc/LoadingSpinner'
 import StorageAdd from '../components/misc/StorageAdd'
@@ -17,6 +17,9 @@ interface Storage {
 export default function CollectionPage() {
   const { collection_id } = useParams<{ collection_id: string }>()
   const [name, setName] = useState("")
+  const [draftName, setDraftName] = useState("")
+  const [editName, setEditName] = useState(false)
+  const [savingName, setSavingName] = useState(false)
   const [storages, setStorages] = useState<Storage[]>([])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true) // Loading distraction
@@ -30,6 +33,40 @@ export default function CollectionPage() {
       setStorages(res)
       setSelectedStorage(-1)
     })
+  }
+
+  const startEditingName = () => {
+    setDraftName(name)
+    setEditName(true)
+  }
+
+  const cancelEditingName = () => {
+    setDraftName(name)
+    setEditName(false)
+  }
+
+  const saveCollectionName = async (event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault()
+
+    const trimmedName = draftName.trim()
+    if (!collection_id || !trimmedName || trimmedName === name) {
+      cancelEditingName()
+      return
+    }
+
+    setSavingName(true)
+
+    try {
+      await apiCollection.updateCollection(Number(collection_id), trimmedName)
+      setName(trimmedName)
+      setDraftName(trimmedName)
+    } catch (error) {
+      console.error('Failed to update collection name:', error)
+      setDraftName(name)
+    } finally {
+      setEditName(false)
+      setSavingName(false)
+    }
   }
 
   const handleDeleteButton = (id: number) => {
@@ -56,12 +93,15 @@ export default function CollectionPage() {
 
   useEffect(() => {
     apiCollection.collectionById(Number(collection_id))
-    .then(res => setName(res.name))
+    .then(res => {
+      setName(res.name)
+      setDraftName(res.name)
+    })
 
     apiStorage.storagesByCollectionID(String(collection_id))
     .then(res => setStorages(res))
     .finally(() => setLoading(false))
-  }, [name])
+  }, [collection_id])
 
 
 if (loading) return <LoadingSpinner />
@@ -72,7 +112,37 @@ if (loading) return <LoadingSpinner />
           <button onClick={() => navigate('/')} className="mb-2 text-blue-500 hover:underline">
             ← Back
           </button>
-          <h1 className="text-2xl font-bold">{name}</h1>
+          {editName ? (
+            <form
+              onSubmit={(event) => saveCollectionName(event)}
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  event.preventDefault()
+                  cancelEditingName()
+                }
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="text"
+                value={draftName}
+                onChange={(event) => setDraftName(event.target.value)}
+                autoFocus
+                className="rounded border border-stone-300 px-2 py-1 text-2xl font-bold"
+              />
+              <button type="submit" disabled={savingName} className="text-sm text-blue-600 hover:underline disabled:text-blue-300">
+                {savingName ? 'Saving...' : 'Save'}
+              </button>
+              <button type="button" onClick={cancelEditingName} className="text-sm text-stone-600 hover:underline">
+                Cancel
+              </button>
+            </form>
+          ) : (
+            <div onClick={startEditingName} className="cursor-pointer">
+              <h1 className="text-2xl font-bold">{name}</h1>
+            </div>
+          )}
         </div>
         <div className="w-[20%] pr-[22%] pt-[1%]">
           <StorageAdd collection_id={collection_id} onUpdate={refreshStorages}/>

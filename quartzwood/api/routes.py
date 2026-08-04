@@ -23,6 +23,7 @@ from quartzwood.services.collection import (
     get_collection_by_name,
     get_collection_by_id,
     create_collection,
+    update_collection,
     delete_collection,
     )
 from quartzwood.services.storage import(
@@ -112,6 +113,25 @@ def api_get_collection_by_id(collection_id: int):
     with get_session() as session:
         return get_collection_by_id(session, collection_id)
 
+@app.put("/api/collection/{collection_id}")
+def api_update_collection(collection_id: int, data: dict = Body(...)):
+    with get_session() as session:
+        existing_collection = get_collection_by_id(session, collection_id)
+        if existing_collection is None:
+            return JSONResponse(status_code=404, content={"detail": "Collection not found"})
+
+        new_name = data.get("new_name") or data.get("name")
+        if not new_name:
+            return JSONResponse(status_code=400, content={"detail": "Collection name is required"})
+
+        updated_collection = update_collection(session, collection_name=existing_collection.name, new_name=new_name)
+        return {
+            "id": updated_collection.id,
+            "name": updated_collection.name,
+            "description": updated_collection.description,
+            "location": updated_collection.location,
+            "owner_id": updated_collection.entity_id,
+        }
 
 @app.delete("/api/collection/{collection_id}") #delete Collection
 def api_delete_collection_by_id(collection_id: int):

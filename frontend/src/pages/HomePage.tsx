@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import LoadingSpinner from '../components/misc/LoadingSpinner'
@@ -13,6 +13,9 @@ export default function HomePage() {
   const [collections, setCollections] = useState<Collection[]>([]) // DB 
   const navigate = useNavigate() // Routes
   const [loading, setLoading] = useState(true) // Loading distraction
+  const [editingCollectionId, setEditingCollectionId] = useState<number | null>(null)
+  const [draftName, setDraftName] = useState("")
+  const [savingName, setSavingName] = useState(false)
 
  const [showPopup, setShowPopup] = useState(false)
   const [selectedStorage, setSelectedStorage] = useState<number>(-1)
@@ -44,6 +47,39 @@ export default function HomePage() {
     })
   }
 
+  const startEditingName = (collection: Collection) => {
+    setDraftName(collection.name)
+    setEditingCollectionId(collection.id)
+  }
+
+  const cancelEditingName = () => {
+    setDraftName("")
+    setEditingCollectionId(null)
+  }
+
+  const saveCollectionName = async (event?: FormEvent<HTMLFormElement>, collectionId?: number | null) => {
+    event?.preventDefault()
+
+    const trimmedName = draftName.trim()
+    if (!collectionId || !trimmedName) {
+      cancelEditingName()
+      return
+    }
+
+    setSavingName(true)
+
+    try {
+      await apiCollection.updateCollection(collectionId, trimmedName)
+      await refreshCollections()
+      setDraftName(trimmedName)
+    } catch (error) {
+      console.error('Failed to update collection name:', error)
+    } finally {
+      setEditingCollectionId(null)
+      setSavingName(false)
+    }
+  }
+
 useEffect(() => {
     apiCollection.allCollections()
     .then(res => {
@@ -72,12 +108,41 @@ if (loading) return <LoadingSpinner />
         {collections.map(c => (
           <div
             key={c.id}
-            onClick={() => navigate(`/collection/${c.id}`)}
-            className="p-4 border rounded cursor-pointer hover:bg-gray-100 relative"
+            className="p-4 border rounded hover:bg-gray-100 relative"
           >
-            <div>
-              <h2 className="text-lg font-semibold">{c.name}</h2>
-              {c.description && <p className="text-gray-500">{c.description}</p>}
+            <div onClick={() => navigate(`/collection/${c.id}`)} className="cursor-pointer">
+              {editingCollectionId === c.id ? (
+                <form
+                  onSubmit={(event) => saveCollectionName(event, c.id)}
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') {
+                      event.preventDefault()
+                      cancelEditingName()
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <input
+                    type="text"
+                    value={draftName}
+                    onChange={(event) => setDraftName(event.target.value)}
+                    autoFocus
+                    className="rounded border border-stone-300 px-2 py-1 text-lg font-semibold"
+                  />
+                  <button type="submit" disabled={savingName} className="text-sm text-blue-600 hover:underline disabled:text-blue-300">
+                    {savingName ? 'Saving...' : 'Save'}
+                  </button>
+                  <button type="button" onClick={cancelEditingName} className="text-sm text-stone-600 hover:underline">
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                <div onClick={() => startEditingName(c)} className="cursor-pointer">
+                  <h2 className="text-lg font-semibold">{c.name}</h2>
+                  {c.description && <p className="text-gray-500">{c.description}</p>}
+                </div>
+              )}
             </div>
 
             <button
