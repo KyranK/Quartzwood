@@ -32,6 +32,10 @@ async function storageRouteInfo(storage_id: string): Promise<any> {
 
 //endregion
 //region PUT
+async function updateStorage(storage_id: string, name: string): Promise<Storage> {
+    const res = await client.put<Storage>(`/storage/${storage_id}`, { new_name: name })
+    return res.data
+}
 
 //endregion
 //region DELETE
@@ -48,5 +52,6 @@ export{
     storagesByCollectionID,
     storageRouteInfo,
     addStorage,
+    updateStorage,
     deleteStorageById,
 }

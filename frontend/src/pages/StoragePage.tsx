@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import * as apiCards from "../api/cards"
 import * as apiStorage from "../api/storage"
@@ -7,7 +7,6 @@ import Panel from '../components/panels/panel'
 import CardPanel from '../components/panels/CardPanel'
 import CardSelection from '../components/panels/cardSelection'
 import CardAdd from '../components/misc/CardAdd'
-import { string } from 'prop-types'
 
 interface Card {
     id: number | null
@@ -36,9 +35,47 @@ export default function StoragePage() {
     const [panelInstances, setPanelInstances] = useState<Card[] | null>(null)
     const [showPanel, setShowPanel] = useState(false)
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
+    const [editName, setEditName] = useState(false)
+    const [draftName, setDraftName] = useState('')
+    const [savingName, setSavingName] = useState(false)
     const refreshCards = () => {
         apiCards.cardsByStorage(String(storage_id))
             .then(res => setCards(res))
+    }
+
+    const startEditingName = () => {
+        setDraftName(storageName)
+        setEditName(true)
+    }
+
+    const cancelEditingName = () => {
+        setDraftName(storageName)
+        setEditName(false)
+    }
+
+    const saveStorageName = async (event?: FormEvent<HTMLFormElement>) => {
+        event?.preventDefault()
+
+        const trimmedName = draftName.trim()
+
+        if (!storage_id || !trimmedName || trimmedName === storageName) {
+            cancelEditingName()
+            return
+        }
+
+        setSavingName(true)
+
+        try {
+            await apiStorage.updateStorage(storage_id, trimmedName)
+            setStorageName(trimmedName)
+            setDraftName(trimmedName)
+        } catch (error) {
+            console.error('Failed to update storage name:', error)
+            setDraftName(storageName)
+        } finally {
+            setEditName(false)
+            setSavingName(false)
+        }
     }
 
 
@@ -65,15 +102,16 @@ export default function StoragePage() {
 
     useEffect(() => {
         apiStorage.storageById(String(storage_id))
-            .then(res => {setStorageName((res.name))})
+            .then(res => {
+                setStorageName(res.name)
+                setDraftName(res.name)
+            })
         apiCards.cardsByStorage(String(storage_id))
             .then(res => setCards(res))
             .finally(() => setLoading(false))
     }, [storage_id])
 
     if (loading) return <LoadingSpinner />
-
-
 
     return (
         <div className="p-8">
@@ -96,7 +134,45 @@ export default function StoragePage() {
             </button>
             <div className="mb-6 relative">
                 <div className="max-w-2xl">
-                    <h1 className="text-2xl font-bold text-stone-900">{storageName}</h1>
+                    {editName ? (
+                        <form
+                            onSubmit={(event) => saveStorageName(event)}
+                            onClick={(event) => event.stopPropagation()}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Escape') {
+                                    event.preventDefault()
+                                    cancelEditingName()
+                                }
+                            }}
+                            className="flex items-center gap-2"
+                        >
+                            <input
+                                type="text"
+                                value={draftName}
+                                onChange={(event) => setDraftName(event.target.value)}
+                                autoFocus
+                                className="rounded border border-stone-300 px-2 py-1 text-2xl font-bold text-stone-900"
+                            />
+                            <button
+                                type="submit"
+                                disabled={savingName}
+                                className="text-sm text-blue-600 hover:underline disabled:text-blue-300"
+                            >
+                                {savingName ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={cancelEditingName}
+                                className="text-sm text-stone-600 hover:underline"
+                            >
+                                Cancel
+                            </button>
+                        </form>
+                    ) : (
+                        <div onClick={startEditingName} className="cursor-pointer">
+                            <h1 className="text-2xl font-bold text-stone-900">{storageName}</h1>
+                        </div>
+                    )}
                 </div>
                 {/* AddCard */}
                 {storage_id ? 

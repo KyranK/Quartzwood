@@ -31,6 +31,7 @@ from quartzwood.services.storage import(
     get_storage_by_collection_id,
     get_storage_by_id,
     create_storage,
+    update_storage,
     delete_storage,
 )
 from quartzwood.services.entity import get_all_entities
@@ -161,6 +162,25 @@ def api_get_storage_by_name(storage_name: str):
 def api_get_storage_by_id(storage_id: int):
     with get_session() as session:
         return get_storage_by_id(session, storage_id)
+
+@app.put("/api/storage/{storage_id}")
+def api_update_storage(storage_id: int, data: dict = Body(...)):
+    with get_session() as session:
+        existing_storage = get_storage_by_id(session, storage_id)
+        if existing_storage is None:
+            return JSONResponse(status_code=404, content={"detail": "Storage not found"})
+
+        new_name = data.get("new_name") or data.get("name")
+        if not new_name:
+            return JSONResponse(status_code=400, content={"detail": "Storage name is required"})
+
+        updated_storage = update_storage(session, name=existing_storage.name, new_name=new_name)
+        return {
+            "id": updated_storage.id,
+            "name": updated_storage.name,
+            "description": updated_storage.description,
+            "collection_id": updated_storage.collection_id,
+        }
 
 @app.get("/api/storage/by-collection/{collection_id}") # Storage by Collection
 def api_get_storage_by_collection(collection_id: str):
