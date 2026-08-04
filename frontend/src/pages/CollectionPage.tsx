@@ -18,11 +18,13 @@ export default function CollectionPage() {
   const { collection_id } = useParams<{ collection_id: string }>()
   const [name, setName] = useState("")
   const [draftName, setDraftName] = useState("")
+  const [draftDescription, setDraftDescription] = useState("")
   const [editName, setEditName] = useState(false)
   const [savingName, setSavingName] = useState(false)
   const [storages, setStorages] = useState<Storage[]>([])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true) // Loading distraction
+  const [collectionDescr, setCollectionDescr] = useState("")
 
   const [showPopup, setShowPopup] = useState(false)
   const [selectedStorage, setSelectedStorage] = useState<number>(-1)
@@ -37,11 +39,13 @@ export default function CollectionPage() {
 
   const startEditingName = () => {
     setDraftName(name)
+    setDraftDescription(collectionDescr)
     setEditName(true)
   }
 
   const cancelEditingName = () => {
     setDraftName(name)
+    setDraftDescription(collectionDescr)
     setEditName(false)
   }
 
@@ -49,7 +53,11 @@ export default function CollectionPage() {
     event?.preventDefault()
 
     const trimmedName = draftName.trim()
-    if (!collection_id || !trimmedName || trimmedName === name) {
+    const trimmedDescription = draftDescription.trim()
+    const hasNameChanged = trimmedName !== name
+    const hasDescriptionChanged = trimmedDescription !== collectionDescr
+
+    if (!collection_id || (!hasNameChanged && !hasDescriptionChanged)) {
       cancelEditingName()
       return
     }
@@ -57,12 +65,15 @@ export default function CollectionPage() {
     setSavingName(true)
 
     try {
-      await apiCollection.updateCollection(Number(collection_id), trimmedName)
-      setName(trimmedName)
-      setDraftName(trimmedName)
+      const updated = await apiCollection.updateCollection(Number(collection_id), trimmedName, trimmedDescription)
+      setName(updated.name)
+      setDraftName(updated.name)
+      setCollectionDescr(updated.description ?? "")
+      setDraftDescription(updated.description ?? "")
     } catch (error) {
-      console.error('Failed to update collection name:', error)
+      console.error('Failed to update collection:', error)
       setDraftName(name)
+      setDraftDescription(collectionDescr)
     } finally {
       setEditName(false)
       setSavingName(false)
@@ -96,11 +107,23 @@ export default function CollectionPage() {
     .then(res => {
       setName(res.name)
       setDraftName(res.name)
+      setCollectionDescr(res.description ?? "")
+      setDraftDescription(res.description ?? "")
     })
 
     apiStorage.storagesByCollectionID(String(collection_id))
     .then(res => setStorages(res))
     .finally(() => setLoading(false))
+
+    apiCollection.collectionById(Number(collection_id))
+    .then(res =>
+      {if(res.description){
+        setCollectionDescr(String(res.description))
+      }else{
+        setCollectionDescr("")
+      }
+      }
+    )
   }, [collection_id])
 
 
@@ -122,7 +145,7 @@ if (loading) return <LoadingSpinner />
                   cancelEditingName()
                 }
               }}
-              className="flex items-center gap-2"
+              className="flex flex-col gap-3 rounded-lg border border-stone-300 bg-white p-3 shadow-sm"
             >
               <input
                 type="text"
@@ -130,17 +153,37 @@ if (loading) return <LoadingSpinner />
                 onChange={(event) => setDraftName(event.target.value)}
                 autoFocus
                 className="rounded border border-stone-300 px-2 py-1 text-2xl font-bold"
+                placeholder="Collection name"
               />
-              <button type="submit" disabled={savingName} className="text-sm text-blue-600 hover:underline disabled:text-blue-300">
-                {savingName ? 'Saving...' : 'Save'}
-              </button>
-              <button type="button" onClick={cancelEditingName} className="text-sm text-stone-600 hover:underline">
-                Cancel
-              </button>
+              <textarea
+                value={draftDescription}
+                onChange={(event) => setDraftDescription(event.target.value)}
+                className="min-h-[90px] rounded border border-stone-300 px-2 py-1 text-sm"
+                placeholder="Collection description"
+              />
+              <div className="flex items-center gap-2">
+                <button type="submit" disabled={savingName} className="text-sm text-blue-600 hover:underline disabled:text-blue-300">
+                  {savingName ? 'Saving...' : 'Save'}
+                </button>
+                <button type="button" onClick={cancelEditingName} className="text-sm text-stone-600 hover:underline">
+                  Cancel
+                </button>
+              </div>
             </form>
           ) : (
-            <div onClick={startEditingName} className="cursor-pointer">
-              <h1 className="text-2xl font-bold">{name}</h1>
+            <div>
+              <div onClick={startEditingName} className="cursor-pointer">
+                <h1 className="text-2xl font-bold">{name}</h1>
+              </div>
+              {collectionDescr &&
+                <>
+                  <hr />
+                  <p className='p-2 pl-3'>
+                    {collectionDescr}
+                  </p>
+                  <hr />
+                </>
+              }
             </div>
           )}
         </div>

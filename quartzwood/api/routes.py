@@ -124,7 +124,13 @@ def api_update_collection(collection_id: int, data: dict = Body(...)):
         if not new_name:
             return JSONResponse(status_code=400, content={"detail": "Collection name is required"})
 
-        updated_collection = update_collection(session, collection_name=existing_collection.name, new_name=new_name)
+        new_description = data.get("new_description")
+        updated_collection = update_collection(
+            session,
+            collection_name=existing_collection.name,
+            new_name=new_name,
+            new_description=new_description,
+        )
         return {
             "id": updated_collection.id,
             "name": updated_collection.name,
@@ -194,7 +200,13 @@ def api_update_storage(storage_id: int, data: dict = Body(...)):
         if not new_name:
             return JSONResponse(status_code=400, content={"detail": "Storage name is required"})
 
-        updated_storage = update_storage(session, name=existing_storage.name, new_name=new_name)
+        new_description = data.get("new_description")
+        updated_storage = update_storage(
+            session,
+            name=existing_storage.name,
+            new_name=new_name,
+            new_description=new_description,
+        )
         return {
             "id": updated_storage.id,
             "name": updated_storage.name,

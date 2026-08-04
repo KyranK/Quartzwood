@@ -37,6 +37,8 @@ export default function StoragePage() {
     const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
     const [editName, setEditName] = useState(false)
     const [draftName, setDraftName] = useState('')
+    const [draftDescription, setDraftDescription] = useState('')
+    const [storageDescription, setStorageDescription] = useState('')
     const [savingName, setSavingName] = useState(false)
     const refreshCards = () => {
         apiCards.cardsByStorage(String(storage_id))
@@ -45,11 +47,13 @@ export default function StoragePage() {
 
     const startEditingName = () => {
         setDraftName(storageName)
+        setDraftDescription(storageDescription)
         setEditName(true)
     }
 
     const cancelEditingName = () => {
         setDraftName(storageName)
+        setDraftDescription(storageDescription)
         setEditName(false)
     }
 
@@ -57,8 +61,11 @@ export default function StoragePage() {
         event?.preventDefault()
 
         const trimmedName = draftName.trim()
+        const trimmedDescription = draftDescription.trim()
+        const hasNameChanged = trimmedName !== storageName
+        const hasDescriptionChanged = trimmedDescription !== storageDescription
 
-        if (!storage_id || !trimmedName || trimmedName === storageName) {
+        if (!storage_id || (!hasNameChanged && !hasDescriptionChanged)) {
             cancelEditingName()
             return
         }
@@ -66,12 +73,15 @@ export default function StoragePage() {
         setSavingName(true)
 
         try {
-            await apiStorage.updateStorage(storage_id, trimmedName)
-            setStorageName(trimmedName)
-            setDraftName(trimmedName)
+            const updated = await apiStorage.updateStorage(storage_id, trimmedName, trimmedDescription)
+            setStorageName(updated.name)
+            setStorageDescription(updated.description ?? '')
+            setDraftName(updated.name)
+            setDraftDescription(updated.description ?? '')
         } catch (error) {
-            console.error('Failed to update storage name:', error)
+            console.error('Failed to update storage:', error)
             setDraftName(storageName)
+            setDraftDescription(storageDescription)
         } finally {
             setEditName(false)
             setSavingName(false)
@@ -104,7 +114,9 @@ export default function StoragePage() {
         apiStorage.storageById(String(storage_id))
             .then(res => {
                 setStorageName(res.name)
+                setStorageDescription(res.description ?? '')
                 setDraftName(res.name)
+                setDraftDescription(res.description ?? '')
             })
         apiCards.cardsByStorage(String(storage_id))
             .then(res => setCards(res))
@@ -144,7 +156,7 @@ export default function StoragePage() {
                                     cancelEditingName()
                                 }
                             }}
-                            className="flex items-center gap-2"
+                            className="flex flex-col gap-3 rounded-lg border border-stone-300 bg-white p-3 shadow-sm"
                         >
                             <input
                                 type="text"
@@ -152,25 +164,42 @@ export default function StoragePage() {
                                 onChange={(event) => setDraftName(event.target.value)}
                                 autoFocus
                                 className="rounded border border-stone-300 px-2 py-1 text-2xl font-bold text-stone-900"
+                                placeholder="Storage name"
                             />
-                            <button
-                                type="submit"
-                                disabled={savingName}
-                                className="text-sm text-blue-600 hover:underline disabled:text-blue-300"
-                            >
-                                {savingName ? 'Saving...' : 'Save'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={cancelEditingName}
-                                className="text-sm text-stone-600 hover:underline"
-                            >
-                                Cancel
-                            </button>
+                            <textarea
+                                value={draftDescription}
+                                onChange={(event) => setDraftDescription(event.target.value)}
+                                className="min-h-[90px] rounded border border-stone-300 px-2 py-1 text-sm"
+                                placeholder="Storage description"
+                            />
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="submit"
+                                    disabled={savingName}
+                                    className="text-sm text-blue-600 hover:underline disabled:text-blue-300"
+                                >
+                                    {savingName ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={cancelEditingName}
+                                    className="text-sm text-stone-600 hover:underline"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </form>
                     ) : (
-                        <div onClick={startEditingName} className="cursor-pointer">
-                            <h1 className="text-2xl font-bold text-stone-900">{storageName}</h1>
+                        <div>
+                            <div onClick={startEditingName} className="cursor-pointer">
+                                <h1 className="text-2xl font-bold text-stone-900">{storageName}</h1>
+                            </div>
+                            {storageDescription && (
+                                <>
+                                    <hr className="my-2" />
+                                    <p className="pl-3 text-sm text-stone-600">{storageDescription}</p>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>

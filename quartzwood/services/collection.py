@@ -55,9 +55,9 @@ def update_collection(
     
     collection = session.get(Collection, collection_id)
 
-    if new_name:
+    if new_name is not None:
         collection.name = new_name
-    if new_description:
+    if new_description is not None:
         collection.description = new_description
     if new_location:
         collection.location = new_location

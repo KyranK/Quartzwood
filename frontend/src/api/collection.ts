@@ -27,8 +27,11 @@ async function collectionsByEntityId(entity_id: number): Promise<Collection[]> {
 
 //endregion
 //region PUT
-async function updateCollection(collection_id: number, name: string): Promise<Collection> {
-    const res = await client.put<Collection>(`/collection/${collection_id}`, { new_name: name })
+async function updateCollection(collection_id: number, name: string, description?: string): Promise<Collection> {
+    const res = await client.put<Collection>(`/collection/${collection_id}`, {
+        new_name: name,
+        new_description: description ?? "",
+    })
     return res.data
 }
 

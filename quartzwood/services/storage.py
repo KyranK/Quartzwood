@@ -66,14 +66,14 @@ def update_storage(
     if storage is None:
         raise ValueError(f"Storage '{name}' not found")
     
-    if new_name:
+    if new_name is not None:
         storage.name = new_name
     if new_collection_name:
         new_collection_id = get_collection_id_by_name(session, new_collection_name)
         if new_collection_id is None:
             raise ValueError(f"New collection '{new_collection_name}' not found")
         storage.collection_id = new_collection_id
-    if new_description:
+    if new_description is not None:
         storage.description = new_description
 
     session.add(storage)
