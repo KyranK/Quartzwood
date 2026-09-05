@@ -1,0 +1,6 @@
+@Quartzwood.Server_HostAddress = http://localhost:5163
+
+GET {{Quartzwood.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

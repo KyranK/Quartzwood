@@ -223,3 +223,6 @@ __marimo__/
 *.sqlite3
 *.pyc
 poetry.lock
+# .NET
+Quartzwood.Server/bin/
+Quartzwood.Server/obj/
