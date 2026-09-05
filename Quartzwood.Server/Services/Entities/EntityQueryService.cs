@@ -2,7 +2,7 @@ using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
 
-namespace Quartzwood.Server.Services;
+namespace Quartzwood.Server.Services.Entities;
 
 public class EntityQueryService : IEntityQueryService
 {

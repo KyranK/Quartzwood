@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.DTOs;
-using Quartzwood.Server.Services;
+using Quartzwood.Server.Services.Entities;
 
 namespace Quartzwood.Server.Controllers;
 

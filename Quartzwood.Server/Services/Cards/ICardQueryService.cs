@@ -1,6 +1,6 @@
 using Quartzwood.Server.DTOs;
 
-namespace Quartzwood.Server.Services;
+namespace Quartzwood.Server.Services.Cards;
 
 public interface ICardQueryService
 {
