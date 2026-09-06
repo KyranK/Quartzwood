@@ -1,0 +1,5 @@
+1. Update C# DTO
+2. dotnet run (server must be running)
+3. npm run generate-types
+4. TypeScript interfaces auto-updated
+5. VS Code will highlight anywhere the old type was used that now breaks

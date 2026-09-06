@@ -18,10 +18,13 @@ public class BoxesController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<BoxDto>), 200)]
     public async Task<IActionResult> GetAll()
         => Ok(await _query.GetAllAsync());
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(BoxDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var box = await _query.GetByIdAsync(id);
@@ -29,10 +32,12 @@ public class BoxesController : ControllerBase
     }
 
     [HttpGet("by-group/{groupId}")]
+    [ProducesResponseType(typeof(IEnumerable<BoxDto>), 200)]
     public async Task<IActionResult> GetByGroup(Guid groupId)
         => Ok(await _query.GetByGroupAsync(groupId));
 
     [HttpPost]
+    [ProducesResponseType(typeof(BoxDto), 201)]
     public async Task<IActionResult> Add(AddBoxDto dto)
     {
         var created = await _command.AddAsync(dto);
@@ -40,6 +45,8 @@ public class BoxesController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(BoxDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> Update(Guid id, UpdateBoxDto dto)
     {
         var updated = await _command.UpdateAsync(id, dto);
@@ -47,6 +54,8 @@ public class BoxesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var deleted = await _command.DeleteAsync(id);

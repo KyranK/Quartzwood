@@ -18,10 +18,13 @@ public class GroupsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<GroupDto>), 200)]
     public async Task<IActionResult> GetAll()
         => Ok(await _query.GetAllAsync());
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(GroupDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var group = await _query.GetByIdAsync(id);
@@ -29,14 +32,17 @@ public class GroupsController : ControllerBase
     }
 
     [HttpGet("by-entity/{entityId}")]
+    [ProducesResponseType(typeof(IEnumerable<GroupDto>), 200)]
     public async Task<IActionResult> GetByEntity(Guid entityId)
         => Ok(await _query.GetByEntityAsync(entityId));
 
     [HttpGet("by-parent/{parentId}")]
+    [ProducesResponseType(typeof(IEnumerable<GroupDto>), 200)]
     public async Task<IActionResult> GetByParent(Guid parentId)
         => Ok(await _query.GetByParentGroupAsync(parentId));
 
     [HttpPost]
+    [ProducesResponseType(typeof(GroupDto), 201)]
     public async Task<IActionResult> Add(AddGroupDto dto)
     {
         try
@@ -51,6 +57,8 @@ public class GroupsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(GroupDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> Update(Guid id, UpdateGroupDto dto)
     {
         var updated = await _command.UpdateAsync(id, dto);
@@ -58,6 +66,8 @@ public class GroupsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var deleted = await _command.DeleteAsync(id);
