@@ -1,9 +1,10 @@
 import { Routes, Route } from 'react-router-dom'
+import EntityPage from './pages/EntityPage.tsx'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<div>Home</div>} />
+      <Route path="/" element={<EntityPage />} />
     </Routes>
   )
 }
