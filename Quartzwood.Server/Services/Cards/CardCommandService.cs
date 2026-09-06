@@ -1,16 +1,19 @@
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
+using Quartzwood.Server.Services.Scryfall;
 
 namespace Quartzwood.Server.Services.Cards;
 
 public class CardCommandService : ICardCommandService
 {
     private readonly ICardRepository _cards;
+    private readonly IScryfallService _scryfall;
 
-    public CardCommandService(ICardRepository cards)
+    public CardCommandService(ICardRepository cards, IScryfallService scryfall)
     {
         _cards = cards;
+        _scryfall = scryfall;
     }
 
     public async Task<CardDto> AddAsync(AddCardDto dto)
@@ -22,24 +25,44 @@ public class CardCommandService : ICardCommandService
         if (!Enum.TryParse<StampType>(dto.StampType, true, out var stampType))
             throw new ArgumentException($"Invalid stamp type: {dto.StampType}");
 
-        var card = new CardInstance
+        // Scryfall lookup
+        string? name = dto.Name;
+        string? scryfallId = null;
+        var nameSource = NameSource.Unknown;
+
+        if (dto.SetCode != null && dto.SetNumber != null)
         {
-            SetCode = dto.SetCode,
-            SetNumber = dto.SetNumber,
-            Name = dto.Name,
-            NameSource = dto.Name != null ? NameSource.Manual : NameSource.Unknown,
-            Condition = condition,
-            FoilType = foilType,
-            StampType = stampType,
-            Language = dto.Language,
-            IsProxy = dto.IsProxy,
-            IsSigned = dto.IsSigned,
-            AlterArtist = dto.AlterArtist,
-            Notes = dto.Notes,
-            BoxId = dto.BoxId,
-            AcquiredDate = dto.AcquiredDate,
-            PurchasePrice = dto.PurchasePrice,
-        };
+            var scryfallCard = await _scryfall.GetCardAsync(dto.SetCode, dto.SetNumber);
+            if (scryfallCard != null)
+            {
+                name = scryfallCard.Name;
+                scryfallId = scryfallCard.Id;
+                nameSource = NameSource.Scryfall;
+            }
+        }
+        else if (dto.Name != null)
+        {
+            nameSource = NameSource.Manual;
+        }
+var card = new CardInstance
+{
+    SetCode = dto.SetCode,
+    SetNumber = dto.SetNumber,
+    Name = name,                  // ← local variable from Scryfall
+    NameSource = nameSource,      // ← local variable from Scryfall
+    ScryfallId = scryfallId,      
+    Condition = condition,
+    FoilType = foilType,
+    StampType = stampType,
+    Language = dto.Language,
+    IsProxy = dto.IsProxy,
+    IsSigned = dto.IsSigned,
+    AlterArtist = dto.AlterArtist,
+    Notes = dto.Notes,
+    BoxId = dto.BoxId,
+    AcquiredDate = dto.AcquiredDate,
+    PurchasePrice = dto.PurchasePrice,
+};
 
         var created = await _cards.AddAsync(card);
         return ToDto(created);

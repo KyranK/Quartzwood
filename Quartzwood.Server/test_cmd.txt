@@ -1,0 +1,19 @@
+# Stop the server first
+Remove-Item quartzwood.db
+dotnet ef database update
+dotnet run
+
+# 1. Create entity
+$entity = Invoke-RestMethod -Uri "http://localhost:5163/api/entities" -Method Post -ContentType "application/json" -Body '{"name": "Me", "type": "Personal"}'
+$entityId = $entity.id
+
+# 2. Create group
+$group = Invoke-RestMethod -Uri "http://localhost:5163/api/groups" -Method Post -ContentType "application/json" -Body "{""name"": ""Main"", ""entityId"": ""$entityId""}"
+$groupId = $group.id
+
+# 3. Create box
+$box = Invoke-RestMethod -Uri "http://localhost:5163/api/boxes" -Method Post -ContentType "application/json" -Body "{""name"": ""RedBinder"", ""groupId"": ""$groupId""}"
+$boxId = $box.id
+
+# 4. Add card
+Invoke-RestMethod -Uri "http://localhost:5163/api/cards" -Method Post -ContentType "application/json" -Body "{""setCode"": ""MH3"", ""setNumber"": ""187"", ""condition"": ""NM"", ""boxId"": ""$boxId""}"

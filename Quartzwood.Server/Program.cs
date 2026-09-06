@@ -6,6 +6,8 @@ using Quartzwood.Server.Services.Boxs;
 using Quartzwood.Server.Services.Cards;
 using Quartzwood.Server.Services.Entities;
 using Quartzwood.Server.Services.Groups;
+using Quartzwood.Server.Services.Scryfall;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,11 @@ builder.Services.AddScoped<ICardCommandService, CardCommandService>();
 builder.Services.AddScoped<IEntityCommandService, EntityCommandService>();
 builder.Services.AddScoped<IGroupCommandService, GroupCommandService>();
 builder.Services.AddScoped<IBoxCommandService, BoxCommandService>();
+builder.Services.AddHttpClient<IScryfallService, ScryfallService>(client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+});
 
 var app = builder.Build();
 
