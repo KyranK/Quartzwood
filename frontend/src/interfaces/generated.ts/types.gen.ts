@@ -46,6 +46,18 @@ export type BoxDto = {
     cardCount: number | string;
 };
 
+export type BreadcrumbDto = {
+    entityName: null | string;
+    entityId: null | string;
+    rootGroupName: null | string;
+    rootGroupId: null | string;
+    hasCollapsed: boolean;
+    parentGroupName: null | string;
+    parentGroupId: null | string;
+    boxName: null | string;
+    boxId: null | string;
+};
+
 export type CardDto = {
     id: string;
     name: null | string;
@@ -259,6 +271,33 @@ export type GetApiBoxesByGroupByGroupIdResponses = {
 };
 
 export type GetApiBoxesByGroupByGroupIdResponse = GetApiBoxesByGroupByGroupIdResponses[keyof GetApiBoxesByGroupByGroupIdResponses];
+
+export type GetApiBreadcrumbByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/breadcrumb/{id}';
+};
+
+export type GetApiBreadcrumbByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiBreadcrumbByIdError = GetApiBreadcrumbByIdErrors[keyof GetApiBreadcrumbByIdErrors];
+
+export type GetApiBreadcrumbByIdResponses = {
+    /**
+     * OK
+     */
+    200: BreadcrumbDto;
+};
+
+export type GetApiBreadcrumbByIdResponse = GetApiBreadcrumbByIdResponses[keyof GetApiBreadcrumbByIdResponses];
 
 export type GetApiCardsData = {
     body?: never;

@@ -38,7 +38,7 @@ export default function BoxPage() {
                                 className="w-full rounded-lg shadow"
                             />
                             {Number(c.count) > 1 && (
-                                <span className="absolute top-2 right-2 bg-white/50 text-black text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                                <span className="absolute top-2 left-2 bg-white/70 text-black text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
                                     {c.count}
                                 </span>
                             )}
