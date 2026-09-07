@@ -18,17 +18,32 @@ public class CardsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<CardDto>), 200)]
     public async Task<IActionResult> GetAll()
         => Ok(await _query.GetAllAsync());
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(CardDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var card = await _query.GetByIdAsync(id);
         return card is null ? NotFound() : Ok(card);
     }
 
+    [HttpGet("by-box/{boxId}")]
+    [ProducesResponseType(typeof(IEnumerable<CardDto>), 200)]
+    public async Task<IActionResult> GetByBox(Guid boxId)
+        => Ok(await _query.GetByBoxAsync(boxId));
+
+    [HttpGet("by-box/{boxId}/grouped")]
+    [ProducesResponseType(typeof(IEnumerable<GroupedCardDto>), 200)]
+    public async Task<IActionResult> GetByBoxGrouped(Guid boxId)
+        => Ok(await _query.GetByBoxGroupedAsync(boxId));
+
     [HttpPost]
+    [ProducesResponseType(typeof(CardDto), 201)]
+    [ProducesResponseType(400)]
     public async Task<IActionResult> Add(AddCardDto dto)
     {
         try
@@ -43,6 +58,8 @@ public class CardsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(typeof(CardDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> Update(Guid id, UpdateCardDto dto)
     {
         var updated = await _command.UpdateAsync(id, dto);
@@ -50,6 +67,8 @@ public class CardsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var deleted = await _command.DeleteAsync(id);

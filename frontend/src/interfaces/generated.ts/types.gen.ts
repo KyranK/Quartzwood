@@ -46,6 +46,24 @@ export type BoxDto = {
     cardCount: number | string;
 };
 
+export type CardDto = {
+    id: string;
+    name: null | string;
+    setCode: null | string;
+    setNumber: null | string;
+    scryfallId: null | string;
+    condition: string;
+    foilType: string;
+    stampType: string;
+    language: string;
+    isProxy: boolean;
+    isSigned: boolean;
+    alterArtist: null | string;
+    notes: null | string;
+    boxId: null | string;
+    tags: Array<string>;
+};
+
 export type GroupDto = {
     id: string;
     name: string;
@@ -54,6 +72,18 @@ export type GroupDto = {
     parentGroupId: null | string;
     childGroupNames: Array<string>;
     boxNames: Array<string>;
+};
+
+export type GroupedCardDto = {
+    name: null | string;
+    setCode: null | string;
+    setNumber: null | string;
+    scryfallId: null | string;
+    condition: string;
+    foilType: string;
+    stampType: string;
+    count: number | string;
+    ids: Array<string>;
 };
 
 export type ProblemDetails = {
@@ -241,8 +271,10 @@ export type GetApiCardsResponses = {
     /**
      * OK
      */
-    200: unknown;
+    200: Array<CardDto>;
 };
+
+export type GetApiCardsResponse = GetApiCardsResponses[keyof GetApiCardsResponses];
 
 export type PostApiCardsData = {
     body: AddCardDto;
@@ -251,12 +283,23 @@ export type PostApiCardsData = {
     url: '/api/cards';
 };
 
+export type PostApiCardsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiCardsError = PostApiCardsErrors[keyof PostApiCardsErrors];
+
 export type PostApiCardsResponses = {
     /**
-     * OK
+     * Created
      */
-    200: unknown;
+    201: CardDto;
 };
+
+export type PostApiCardsResponse = PostApiCardsResponses[keyof PostApiCardsResponses];
 
 export type DeleteApiCardsByIdData = {
     body?: never;
@@ -267,12 +310,23 @@ export type DeleteApiCardsByIdData = {
     url: '/api/cards/{id}';
 };
 
+export type DeleteApiCardsByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type DeleteApiCardsByIdError = DeleteApiCardsByIdErrors[keyof DeleteApiCardsByIdErrors];
+
 export type DeleteApiCardsByIdResponses = {
     /**
-     * OK
+     * No Content
      */
-    200: unknown;
+    204: void;
 };
+
+export type DeleteApiCardsByIdResponse = DeleteApiCardsByIdResponses[keyof DeleteApiCardsByIdResponses];
 
 export type GetApiCardsByIdData = {
     body?: never;
@@ -283,12 +337,23 @@ export type GetApiCardsByIdData = {
     url: '/api/cards/{id}';
 };
 
+export type GetApiCardsByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiCardsByIdError = GetApiCardsByIdErrors[keyof GetApiCardsByIdErrors];
+
 export type GetApiCardsByIdResponses = {
     /**
      * OK
      */
-    200: unknown;
+    200: CardDto;
 };
+
+export type GetApiCardsByIdResponse = GetApiCardsByIdResponses[keyof GetApiCardsByIdResponses];
 
 export type PutApiCardsByIdData = {
     body: UpdateCardDto;
@@ -299,12 +364,59 @@ export type PutApiCardsByIdData = {
     url: '/api/cards/{id}';
 };
 
+export type PutApiCardsByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutApiCardsByIdError = PutApiCardsByIdErrors[keyof PutApiCardsByIdErrors];
+
 export type PutApiCardsByIdResponses = {
     /**
      * OK
      */
-    200: unknown;
+    200: CardDto;
 };
+
+export type PutApiCardsByIdResponse = PutApiCardsByIdResponses[keyof PutApiCardsByIdResponses];
+
+export type GetApiCardsByBoxByBoxIdData = {
+    body?: never;
+    path: {
+        boxId: string;
+    };
+    query?: never;
+    url: '/api/cards/by-box/{boxId}';
+};
+
+export type GetApiCardsByBoxByBoxIdResponses = {
+    /**
+     * OK
+     */
+    200: Array<CardDto>;
+};
+
+export type GetApiCardsByBoxByBoxIdResponse = GetApiCardsByBoxByBoxIdResponses[keyof GetApiCardsByBoxByBoxIdResponses];
+
+export type GetApiCardsByBoxByBoxIdGroupedData = {
+    body?: never;
+    path: {
+        boxId: string;
+    };
+    query?: never;
+    url: '/api/cards/by-box/{boxId}/grouped';
+};
+
+export type GetApiCardsByBoxByBoxIdGroupedResponses = {
+    /**
+     * OK
+     */
+    200: Array<GroupedCardDto>;
+};
+
+export type GetApiCardsByBoxByBoxIdGroupedResponse = GetApiCardsByBoxByBoxIdGroupedResponses[keyof GetApiCardsByBoxByBoxIdGroupedResponses];
 
 export type GetApiEntitiesData = {
     body?: never;

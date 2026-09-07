@@ -1,43 +1,38 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-
-// Shape of data coming from API
-interface Entity {
-    id: string
-    name: string
-    type: string
-    location: string | null
-}
+import type { GroupDto } from '../interfaces/generated.ts/types.gen'
 
 export default function EntityPage() {
-    const [entities, setEntities] = useState<Entity[]>([])
+    const { id } = useParams<{ id: string }>()
+    const [groups, setGroups] = useState<GroupDto[]>([])
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
-    // Runs once on mount — fetches data
     useEffect(() => {
-        client.get<Entity[]>('/entities')
-            .then(res => setEntities(res.data))
+        client.get<GroupDto[]>(`/groups/by-entity/${id}`)
+            .then(res => setGroups(res.data))
             .finally(() => setLoading(false))
-    }, [])
+    }, [id])
 
     if (loading) return <div className="p-8">Loading...</div>
 
     return (
         <div className="p-8">
-            <h1 className="text-2xl font-bold mb-6">Collections</h1>
+            <button onClick={() => navigate('/')} className="mb-4 text-blue-500 hover:underline">← Back</button>
+            <h1 className="text-2xl font-bold mb-6">Groups</h1>
             <div className="grid grid-cols-1 gap-4">
-                {entities.map(e => (
+                {groups.map(g => (
                     <div
-                        key={e.id}
-                        onClick={() => navigate(`/entity/${e.id}`)}
+                        key={g.id}
+                        onClick={() => navigate(`/group/${g.id}`)}
                         className="p-4 border rounded cursor-pointer hover:bg-gray-100"
                     >
-                        <h2 className="text-lg font-semibold">{e.name}</h2>
-                        <p className="text-sm text-gray-500">{e.type}</p>
+                        <h2 className="text-lg font-semibold">{g.name}</h2>
+                        {g.description && <p className="text-sm text-gray-500">{g.description}</p>}
                     </div>
                 ))}
+                {groups.length === 0 && <p className="text-gray-500">No groups found.</p>}
             </div>
         </div>
     )

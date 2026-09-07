@@ -1,38 +1,51 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import type { BoxDto } from '../interfaces/generated.ts/types.gen'
+import type { CardDto } from '../interfaces/generated.ts'
+import type { BoxDto } from '../interfaces/generated.ts'
+import type { GroupedCardDto } from '../interfaces/generated.ts'
 
 export default function BoxPage() {
     const { id } = useParams<{ id: string }>()
-    const [boxes, setBoxes] = useState<BoxDto[]>([])
+    const [cards, setCards] = useState<GroupedCardDto[]>([])
+    const [box, setBox] = useState<BoxDto>()
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
     useEffect(() => {
-        client.get<BoxDto[]>(`/boxes/by-group/${id}`)
-            .then(res => setBoxes(res.data))
-            .finally(() => setLoading(false))
+        Promise.all([
+            client.get<GroupedCardDto[]>(`/cards/by-box/${id}/grouped`),
+            client.get<BoxDto>(`/boxes/${id}`)
+        ]).then(([cardsRes, boxRes]) => {
+            setCards([...cardsRes.data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
+            setBox(boxRes.data)
+        }).finally(() => setLoading(false))
     }, [id])
 
-    if (loading) return <div className="p-8">Loading...</div>
-
-    return (
+    return loading ? 
+    (<div className="p-8">Loading...</div>) : 
+    (
         <div className="p-8">
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
-            <h1 className="text-2xl font-bold mb-6">Boxes</h1>
-            <div className="grid grid-cols-1 gap-4">
-                {boxes.map(b => (
-                    <div
-                        key={b.id}
-                        onClick={() => navigate(`/box/${b.id}`)}
-                        className="p-4 border rounded cursor-pointer hover:bg-gray-100"
-                    >
-                        <h2 className="text-lg font-semibold">{b.name}</h2>
-                        <p className="text-sm text-gray-500">{b.cardCount} cards</p>
-                    </div>
-                ))}
-                {boxes.length === 0 && <p className="text-gray-500">No boxes found.</p>}
+            <h1 className="text-2xl font-bold mb-6">{box?.name}</h1>
+            <div className="pl-8">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                    {cards.map(c => (
+                        <div key={`${c.setCode}-${c.setNumber}-${c.condition}-${c.foilType}`} className='relative flex flex-col items-center'>
+                            <img
+                                src={`https://api.scryfall.com/cards/${c.scryfallId}?format=image&version=normal`}
+                                alt={c.name ?? ''}
+                                className="w-full rounded-lg shadow"
+                            />
+                            {Number(c.count) > 1 && (
+                                <span className="absolute top-2 right-2 bg-white/50 text-black text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                                    {c.count}
+                                </span>
+                            )}
+                            <span className='text-center text-xs mt-1'>{c.name} ⋆ {c.condition} {c.foilType !== "None" && "⋆ " + c.foilType}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )

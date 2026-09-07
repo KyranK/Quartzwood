@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiBoxesByIdData, DeleteApiBoxesByIdErrors, DeleteApiBoxesByIdResponses, DeleteApiCardsByIdData, DeleteApiCardsByIdResponses, DeleteApiEntitiesByIdData, DeleteApiEntitiesByIdResponses, DeleteApiGroupsByIdData, DeleteApiGroupsByIdErrors, DeleteApiGroupsByIdResponses, GetApiBoxesByGroupByGroupIdData, GetApiBoxesByGroupByGroupIdResponses, GetApiBoxesByIdData, GetApiBoxesByIdErrors, GetApiBoxesByIdResponses, GetApiBoxesData, GetApiBoxesResponses, GetApiCardsByIdData, GetApiCardsByIdResponses, GetApiCardsData, GetApiCardsResponses, GetApiEntitiesByIdData, GetApiEntitiesByIdResponses, GetApiEntitiesData, GetApiEntitiesResponses, GetApiGroupsByEntityByEntityIdData, GetApiGroupsByEntityByEntityIdResponses, GetApiGroupsByIdData, GetApiGroupsByIdErrors, GetApiGroupsByIdResponses, GetApiGroupsByParentByParentIdData, GetApiGroupsByParentByParentIdResponses, GetApiGroupsData, GetApiGroupsResponses, PostApiBoxesData, PostApiBoxesResponses, PostApiCardsData, PostApiCardsResponses, PostApiEntitiesData, PostApiEntitiesResponses, PostApiGroupsData, PostApiGroupsResponses, PutApiBoxesByIdData, PutApiBoxesByIdErrors, PutApiBoxesByIdResponses, PutApiCardsByIdData, PutApiCardsByIdResponses, PutApiEntitiesByIdData, PutApiEntitiesByIdResponses, PutApiGroupsByIdData, PutApiGroupsByIdErrors, PutApiGroupsByIdResponses } from './types.gen';
+import type { DeleteApiBoxesByIdData, DeleteApiBoxesByIdErrors, DeleteApiBoxesByIdResponses, DeleteApiCardsByIdData, DeleteApiCardsByIdErrors, DeleteApiCardsByIdResponses, DeleteApiEntitiesByIdData, DeleteApiEntitiesByIdResponses, DeleteApiGroupsByIdData, DeleteApiGroupsByIdErrors, DeleteApiGroupsByIdResponses, GetApiBoxesByGroupByGroupIdData, GetApiBoxesByGroupByGroupIdResponses, GetApiBoxesByIdData, GetApiBoxesByIdErrors, GetApiBoxesByIdResponses, GetApiBoxesData, GetApiBoxesResponses, GetApiCardsByBoxByBoxIdData, GetApiCardsByBoxByBoxIdGroupedData, GetApiCardsByBoxByBoxIdGroupedResponses, GetApiCardsByBoxByBoxIdResponses, GetApiCardsByIdData, GetApiCardsByIdErrors, GetApiCardsByIdResponses, GetApiCardsData, GetApiCardsResponses, GetApiEntitiesByIdData, GetApiEntitiesByIdResponses, GetApiEntitiesData, GetApiEntitiesResponses, GetApiGroupsByEntityByEntityIdData, GetApiGroupsByEntityByEntityIdResponses, GetApiGroupsByIdData, GetApiGroupsByIdErrors, GetApiGroupsByIdResponses, GetApiGroupsByParentByParentIdData, GetApiGroupsByParentByParentIdResponses, GetApiGroupsData, GetApiGroupsResponses, PostApiBoxesData, PostApiBoxesResponses, PostApiCardsData, PostApiCardsErrors, PostApiCardsResponses, PostApiEntitiesData, PostApiEntitiesResponses, PostApiGroupsData, PostApiGroupsResponses, PutApiBoxesByIdData, PutApiBoxesByIdErrors, PutApiBoxesByIdResponses, PutApiCardsByIdData, PutApiCardsByIdErrors, PutApiCardsByIdResponses, PutApiEntitiesByIdData, PutApiEntitiesByIdResponses, PutApiGroupsByIdData, PutApiGroupsByIdErrors, PutApiGroupsByIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -46,7 +46,7 @@ export const getApiBoxesByGroupByGroupId = <ThrowOnError extends boolean = false
 
 export const getApiCards = <ThrowOnError extends boolean = false>(options?: Options<GetApiCardsData, ThrowOnError>): RequestResult<GetApiCardsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiCardsResponses, unknown, ThrowOnError>({ url: '/api/cards', ...options });
 
-export const postApiCards = <ThrowOnError extends boolean = false>(options: Options<PostApiCardsData, ThrowOnError>): RequestResult<PostApiCardsResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiCardsResponses, unknown, ThrowOnError>({
+export const postApiCards = <ThrowOnError extends boolean = false>(options: Options<PostApiCardsData, ThrowOnError>): RequestResult<PostApiCardsResponses, PostApiCardsErrors, ThrowOnError> => (options.client ?? client).post<PostApiCardsResponses, PostApiCardsErrors, ThrowOnError>({
     url: '/api/cards',
     ...options,
     headers: {
@@ -55,11 +55,11 @@ export const postApiCards = <ThrowOnError extends boolean = false>(options: Opti
     }
 });
 
-export const deleteApiCardsById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiCardsByIdData, ThrowOnError>): RequestResult<DeleteApiCardsByIdResponses, unknown, ThrowOnError> => (options.client ?? client).delete<DeleteApiCardsByIdResponses, unknown, ThrowOnError>({ url: '/api/cards/{id}', ...options });
+export const deleteApiCardsById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiCardsByIdData, ThrowOnError>): RequestResult<DeleteApiCardsByIdResponses, DeleteApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiCardsByIdResponses, DeleteApiCardsByIdErrors, ThrowOnError>({ url: '/api/cards/{id}', ...options });
 
-export const getApiCardsById = <ThrowOnError extends boolean = false>(options: Options<GetApiCardsByIdData, ThrowOnError>): RequestResult<GetApiCardsByIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiCardsByIdResponses, unknown, ThrowOnError>({ url: '/api/cards/{id}', ...options });
+export const getApiCardsById = <ThrowOnError extends boolean = false>(options: Options<GetApiCardsByIdData, ThrowOnError>): RequestResult<GetApiCardsByIdResponses, GetApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiCardsByIdResponses, GetApiCardsByIdErrors, ThrowOnError>({ url: '/api/cards/{id}', ...options });
 
-export const putApiCardsById = <ThrowOnError extends boolean = false>(options: Options<PutApiCardsByIdData, ThrowOnError>): RequestResult<PutApiCardsByIdResponses, unknown, ThrowOnError> => (options.client ?? client).put<PutApiCardsByIdResponses, unknown, ThrowOnError>({
+export const putApiCardsById = <ThrowOnError extends boolean = false>(options: Options<PutApiCardsByIdData, ThrowOnError>): RequestResult<PutApiCardsByIdResponses, PutApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).put<PutApiCardsByIdResponses, PutApiCardsByIdErrors, ThrowOnError>({
     url: '/api/cards/{id}',
     ...options,
     headers: {
@@ -67,6 +67,10 @@ export const putApiCardsById = <ThrowOnError extends boolean = false>(options: O
         ...options.headers
     }
 });
+
+export const getApiCardsByBoxByBoxId = <ThrowOnError extends boolean = false>(options: Options<GetApiCardsByBoxByBoxIdData, ThrowOnError>): RequestResult<GetApiCardsByBoxByBoxIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiCardsByBoxByBoxIdResponses, unknown, ThrowOnError>({ url: '/api/cards/by-box/{boxId}', ...options });
+
+export const getApiCardsByBoxByBoxIdGrouped = <ThrowOnError extends boolean = false>(options: Options<GetApiCardsByBoxByBoxIdGroupedData, ThrowOnError>): RequestResult<GetApiCardsByBoxByBoxIdGroupedResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiCardsByBoxByBoxIdGroupedResponses, unknown, ThrowOnError>({ url: '/api/cards/by-box/{boxId}/grouped', ...options });
 
 export const getApiEntities = <ThrowOnError extends boolean = false>(options?: Options<GetApiEntitiesData, ThrowOnError>): RequestResult<GetApiEntitiesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiEntitiesResponses, unknown, ThrowOnError>({ url: '/api/entities', ...options });
 

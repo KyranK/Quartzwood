@@ -48,4 +48,31 @@ public class CardQueryService : ICardQueryService
         c.BoxId,
         c.CardTags.Select(ct => ct.Tag.Name)
     );
+
+    public async Task<IEnumerable<GroupedCardDto>> GetByBoxGroupedAsync(Guid boxId)
+{
+    var cards = await _cards.GetByBoxAsync(boxId);
+
+    return cards
+        .GroupBy(c => new {
+            c.Name,
+            c.SetCode,
+            c.SetNumber,
+            c.ScryfallId,
+            c.Condition,
+            c.FoilType,
+            c.StampType
+        })
+        .Select(g => new GroupedCardDto(
+            g.Key.Name,
+            g.Key.SetCode,
+            g.Key.SetNumber,
+            g.Key.ScryfallId,
+            g.Key.Condition.ToString(),
+            g.Key.FoilType.ToString(),
+            g.Key.StampType.ToString(),
+            g.Count(),
+            g.Select(c => c.Id.ToString()).ToList()
+        ));
+}
 }

@@ -19,6 +19,19 @@ public record CardDto(
     IEnumerable<string> Tags
 );
 
+// What the API returns for a collated group of cards
+public record GroupedCardDto(
+    string? Name,
+    string? SetCode,
+    string? SetNumber,
+    string? ScryfallId,
+    string Condition,
+    string FoilType,
+    string StampType,
+    int Count,
+    List<string> Ids
+);
+
 // What the API accepts to create a card
 public record AddCardDto(
     string? SetCode,
